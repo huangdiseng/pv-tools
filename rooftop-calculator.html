@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光伏工具箱 - 选型计算工具集</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft YaHei","微软雅黑",Arial,sans-serif; font-size: 14px; color: #333; background: #e3f2fd; min-width: 320px; }
+
+/* ===== LOGO 头部栏 ===== */
+.logo-header { background: linear-gradient(135deg, #0D47A1 0%, #1565C0 40%, #1E88E5 100%); padding: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); position: relative; overflow: hidden; }
+.logo-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+.logo-header::after { content: ''; position: absolute; bottom: -60%; left: 5%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+.logo-inner { max-width: 1100px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+.logo-left { display: flex; align-items: center; gap: 14px; }
+.logo-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.logo-text-block { display: flex; flex-direction: column; }
+.logo-title { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 2px; }
+.logo-subtitle { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1px; }
+.logo-right { display: flex; align-items: center; gap: 8px; }
+.logo-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 20px; padding: 5px 16px; font-size: 13px; color: #fff; font-weight: 500; }
+
+@media (max-width: 600px) { .logo-title { font-size: 16px; letter-spacing: 1px; } .logo-subtitle { font-size: 10px; } .logo-icon { width: 36px; height: 36px; font-size: 18px; } }
+
+/* ===== 工具箱导航 ===== */
+.toolbox-nav { background: #fff; border-bottom: 2px solid #2196F3; box-shadow: 0 2px 8px rgba(33,150,243,0.12); }
+.toolbox-nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 16px; display: flex; flex-wrap: wrap; }
+.toolbox-nav a { display: block; padding: 14px 22px; text-decoration: none; color: #555; font-size: 13.5px; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; cursor: pointer; }
+.toolbox-nav a:hover { color: #1976D2; border-bottom-color: #64B5F6; }
+.toolbox-nav a.active { color: #1565C0; font-weight: 700; border-bottom-color: #1565C0; }
+
+/* ===== 页面主体 ===== */
+.page-content { max-width: 1100px; margin: 20px auto; padding: 0 16px 40px; }
+
+/* ===== 工具标题 ===== */
+.tool-title-bar { background: linear-gradient(135deg, #1565C0 0%, #42A5F5 100%); color: #fff; padding: 16px 24px; border-radius: 10px 10px 0 0; display: flex; align-items: center; gap: 12px; }
+.tool-title-bar .icon { font-size: 22px; }
+.tool-title-bar h1 { font-size: 18px; font-weight: 700; }
+
+/* ===== 说明卡片 ===== */
+.notice-card { background: #fffde7; border: 1px solid #ffc107; border-top: none; padding: 12px 24px; }
+.notice-card .notice-title { font-weight: 700; color: #f57c00; margin-bottom: 5px; }
+.notice-card ol { padding-left: 18px; color: #666; line-height: 1.9; font-size: 13px; }
+
+/* ===== 主工具区域 ===== */
+.tool-body { background: #fff; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 10px 10px; padding: 24px 24px 32px; }
+
+/* ===== 参数面板 ===== */
+.params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+@media (max-width: 720px) { .params-grid { grid-template-columns: 1fr; } }
+.param-section { background: #f5f9ff; border: 1px solid #bbdefb; border-radius: 8px; overflow: hidden; }
+.param-section-title { background: #bbdefb; color: #0d47a1; font-weight: 700; font-size: 13px; padding: 9px 16px; border-bottom: 1px solid #90caf9; display: flex; align-items: center; gap: 6px; }
+.param-section-body { padding: 16px; }
+.param-row { display: flex; align-items: center; margin-bottom: 11px; gap: 8px; }
+.param-row:last-child { margin-bottom: 0; }
+.param-label { min-width: 90px; color: #555; font-size: 13px; flex-shrink: 0; }
+.param-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
+input[type="number"], input[type="text"], select { border: 1px solid #ccc; border-radius: 4px; padding: 5px 9px; font-size: 13px; outline: none; transition: border .2s; background: #fffde7; color: #333; }
+input:focus, select:focus { border-color: #2196F3; box-shadow: 0 0 0 2px rgba(33,150,243,0.15); }
+.param-input-wrap input[type="number"], .param-input-wrap input[type="text"] { width: 110px; }
+.param-unit { color: #888; font-size: 12px; flex-shrink: 0; }
+.param-hint { font-size: 11px; color: #f57c00; margin-top: 3px; padding-left: 90px; }
+
+/* ===== 添加厂房 ===== */
+.add-factory-card { background: #e8f0fe; border: 1px solid #90caf9; border-radius: 8px; padding: 16px 18px; margin-bottom: 22px; }
+.add-factory-title { font-weight: 700; color: #1565C0; margin-bottom: 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.add-factory-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.add-factory-row .field { display: flex; flex-direction: column; gap: 4px; }
+.add-factory-row .field label { font-size: 12px; color: #555; }
+.add-factory-row input[type="text"], .add-factory-row input[type="number"] { width: 140px; }
+
+.btn-primary { background: linear-gradient(135deg,#1565C0,#42A5F5); color: #fff; border: none; padding: 8px 22px; border-radius: 5px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all .2s; white-space: nowrap; }
+.btn-primary:hover { background: linear-gradient(135deg,#0d47a1,#1976D2); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-export { background: #ff8c00; color: #fff; border: none; padding: 7px 16px; border-radius: 5px; font-size: 13px; cursor: pointer; font-weight: 600; transition: all .2s; display: flex; align-items: center; gap: 5px; }
+.btn-export:hover { background: #e07b00; transform: translateY(-1px); }
+.btn-delete { background: #e74c3c; color: #fff; border: none; padding: 4px 12px; border-radius: 3px; font-size: 12px; cursor: pointer; transition: background .2s; }
+.btn-delete:hover { background: #c0392b; }
+
+/* ===== 结果表格 ===== */
+.result-section { margin-bottom: 26px; }
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.result-title { font-weight: 700; color: #333; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.table-scroll-wrap { overflow-x: auto; border-radius: 6px; border: 1px solid #ddd; }
+table.result-table { width: 100%; border-collapse: collapse; min-width: 540px; }
+table.result-table th { background: #1565C0; color: #fff; padding: 9px 12px; font-size: 13px; font-weight: 600; text-align: center; white-space: nowrap; }
+table.result-table td { padding: 8px 12px; text-align: center; font-size: 13px; border-bottom: 1px solid #eee; color: #444; }
+table.result-table tr:last-child td { border-bottom: none; }
+table.result-table tbody tr:nth-child(even) { background: #f5f9ff; }
+table.result-table tbody tr:hover { background: #e3f2fd; }
+table.result-table .output-cell { color: #c0392b; font-weight: 700; }
+table.result-table tfoot tr td { background: #e3f2fd; font-weight: 700; color: #1565C0; font-size: 14px; border-top: 2px solid #90caf9; }
+.example-note { font-size: 12px; color: #aaa; font-style: italic; text-align: center; padding: 5px 0 2px; }
+
+/* ===== 参考表格 ===== */
+.reference-section { margin-bottom: 20px; }
+.reference-title { font-weight: 700; color: #555; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+table.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 380px; }
+table.ref-table th { background: #42A5F5; color: #fff; padding: 8px 12px; text-align: left; }
+table.ref-table td { padding: 8px 12px; border-bottom: 1px solid #eee; color: #555; }
+table.ref-table tr:nth-child(even) td { background: #f5f9ff; }
+.ref-note { font-size: 12px; color: #e74c3c; margin-top: 6px; line-height: 1.7; }
+
+/* ===== 断路器专属样式 ===== */
+.voltage-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+.voltage-tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 13px; color: #888; border-bottom: 3px solid transparent; transition: all .2s; }
+.voltage-tab:hover { color: #1976D2; }
+.voltage-tab.active { color: #1565C0; border-bottom-color: #1565C0; }
+.mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.mode-btn { padding: 6px 18px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; font-size: 12px; transition: all .2s; }
+.mode-btn.active { background: #1565C0; color: #fff; border-color: #1565C0; }
+.breaker-option-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.breaker-opt { padding: 6px 14px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 12px; background: #fff; transition: all .2s; }
+.breaker-opt:hover { border-color: #2196F3; }
+.breaker-opt.selected { background: #1565C0; color: #fff; border-color: #1565C0; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+.result-card { background: #f5f9ff; border: 1px solid #bbdefb; border-radius: 8px; padding: 14px 16px; }
+.result-card .rc-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.result-card .rc-value { font-size: 22px; font-weight: 700; color: #1565C0; }
+.result-card .rc-detail { font-size: 13px; color: #c0392b; font-weight: 700; margin-top: 4px; }
+
+/* ===== 发电量专属样式 ===== */
+.search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+.search-box input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; background: #fff; }
+.search-results { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; background: #fff; display: none; }
+.search-result-item { padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #eee; transition: background .15s; }
+.search-result-item:hover { background: #e3f2fd; }
+.monthly-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+@media (max-width: 600px) { .monthly-grid { grid-template-columns: repeat(3, 1fr); } }
+.month-card { background: #f5f9ff; border: 1px solid #bbdefb; border-radius: 6px; padding: 8px; text-align: center; }
+.month-card .mc-m { font-size: 11px; color: #888; }
+.month-card .mc-v { font-size: 15px; font-weight: 700; color: #1565C0; margin-top: 2px; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 16px; }
+
+/* ===== 标签页切换 ===== */
+.tool-panel { display: none; }
+.tool-panel.active { display: block; }
+
+/* ===== 加载遮罩 ===== */
+.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 9999; align-items: center; justify-content: center; }
+.loading-overlay.show { display: flex; }
+.loading-box { background: #fff; border-radius: 8px; padding: 24px 32px; text-align: center; font-size: 14px; color: #333; }
+.spinner { width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top-color: #1565C0; border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width:600px) { .toolbox-nav a { padding: 10px 12px; font-size: 12px; } .tool-body { padding: 14px 12px 24px; } .add-factory-row .field input { width: 110px; } .cable-table-grid { grid-template-columns: 1fr !important; } }
+.notification { display: none; position: fixed; top: 20px; right: 20px; background: #43a047; color: #fff; padding: 12px 20px; border-radius: 6px; font-size: 14px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* ===== 计算推导过程 ===== */
+.process-toggle { display: inline-flex; align-items: center; gap: 6px; background: #e3f2fd; border: 1px solid #90caf9; color: #1565C0; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .2s; }
+.process-toggle:hover { background: #bbdefb; }
+.process-toggle .arrow { transition: transform .3s; font-size: 11px; }
+.process-toggle.expanded .arrow { transform: rotate(90deg); }
+.process-body { display: none; margin-top: 16px; }
+.process-body.show { display: block; }
+
+.step-card { background: #fafbff; border: 1px solid #e0e8f0; border-left: 4px solid #42A5F5; border-radius: 6px; padding: 14px 18px; margin-bottom: 12px; }
+.step-card:last-child { margin-bottom: 0; }
+
+/* ===== 选型说明 ===== */
+.sel-guide-toggle { display: inline-flex; align-items: center; gap: 6px; background: #fff8e1; border: 1px solid #ffcc02; color: #e65100; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all .2s; margin-bottom: 16px; }
+.sel-guide-toggle:hover { background: #ffecb3; }
+.sel-guide-toggle .arrow { transition: transform .3s; font-size: 11px; }
+.sel-guide-toggle.expanded .arrow { transform: rotate(90deg); }
+.sel-guide-body { display: none; background: #fffdf5; border: 1px solid #ffe082; border-radius: 8px; padding: 18px 20px; margin-bottom: 20px; }
+.sel-guide-body.show { display: block; }
+.sel-guide-section { margin-bottom: 16px; }
+.sel-guide-section:last-child { margin-bottom: 0; }
+.sel-guide-section h3 { font-size: 14px; color: #e65100; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #ffe082; }
+.sel-guide-section p { font-size: 13px; color: #555; line-height: 1.8; margin: 0; }
+.sel-guide-section ul { margin: 6px 0 0 0; padding-left: 18px; }
+.sel-guide-section ul li { font-size: 13px; color: #555; line-height: 1.8; }
+.sel-guide-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.sel-guide-table th { background: #fff3e0; color: #e65100; padding: 6px 10px; text-align: center; border: 1px solid #ffe0b2; font-weight: 600; }
+.sel-guide-table td { padding: 6px 10px; text-align: center; border: 1px solid #ffe0b2; color: #555; }
+.sel-guide-table tr:nth-child(even) td { background: #fffdf5; }
+.sel-guide-highlight { display: inline-block; background: #fff3e0; border: 1px solid #ffcc02; border-radius: 3px; padding: 1px 6px; font-size: 12px; color: #e65100; font-weight: 600; }
+.sel-guide-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; margin-right: 4px; }
+.sel-guide-tag.ok { background: #e8f5e9; color: #2e7d32; }
+.sel-guide-tag.warn { background: #fff3e0; color: #e65100; }
+.sel-guide-tag.info { background: #e3f2fd; color: #1565C0; }
+
+/* ===== 储能计算器 ===== */
+.es-subtabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap; }
+.es-subtab { padding: 10px 20px; cursor: pointer; font-weight: 600; font-size: 13px; color: #888; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; }
+.es-subtab:hover { color: #E65100; }
+.es-subtab.active { color: #E65100; border-bottom-color: #FF9800; }
+.es-panel { display: none; }
+.es-panel.active { display: block; }
+.es-preset-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.es-preset-btn { padding: 8px 18px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 13px; transition: all .2s; font-weight: 500; color: #555; }
+.es-preset-btn:hover { border-color: #FF9800; color: #E65100; }
+.es-preset-btn.active { background: linear-gradient(135deg,#FF9800,#FF5722); color: #fff; border-color: transparent; }
+.es-param-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px; }
+.es-param-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; }
+.es-param-row:last-child { border-bottom: none; }
+.es-param-label { font-size: 13px; color: #333; font-weight: 500; flex: 1; }
+.es-param-input { width: 130px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; text-align: right; font-size: 13px; background: #fff; }
+.es-param-unit { font-size: 11px; color: #999; margin-left: 4px; width: 60px; display: inline-block; }
+.es-param-note { font-size: 10px; color: #bbb; margin-left: 4px; }
+.es-result-card { background: linear-gradient(135deg,#FFF8E1,#FFF3E0); border: 2px solid #FF9800; border-radius: 10px; padding: 20px 24px; text-align: center; margin-bottom: 16px; }
+.es-result-value { font-size: 36px; font-weight: 800; color: #E65100; }
+.es-result-unit { font-size: 16px; color: #E65100; font-weight: 600; margin-left: 4px; }
+.es-result-sub { font-size: 12px; color: #999; margin-top: 4px; }
+.es-info-box { background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; font-size: 13px; color: #e65100; }
+/* 24h timeline */
+.es-timeline { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin: 12px 0; }
+.es-tl-hour { text-align: center; font-size: 9px; color: #888; }
+.es-tl-bar { height: 80px; border-radius: 3px 3px 0 0; position: relative; cursor: pointer; transition: all .15s; }
+.es-tl-bar:hover { opacity: 0.85; transform: scaleY(1.05); }
+.es-tl-val { position: absolute; bottom: 2px; width: 100%; text-align: center; font-size: 8px; color: #555; font-weight: 600; }
+.es-tl-bar.gen { background: linear-gradient(to top, #FF9800, #FFCC80); }
+.es-tl-bar.load { background: linear-gradient(to top, #1565C0, #90CAF9); }
+.es-tl-bar.batt { background: linear-gradient(to top, #4CAF50, #A5D6A7); }
+.es-summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+@media (max-width:768px) { .es-timeline { grid-template-columns: repeat(12, 1fr); } .es-tl-bar { height: 50px; } .es-subtab { padding: 8px 12px; font-size: 12px; } }
+.step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.step-number { background: linear-gradient(135deg,#1565C0,#42A5F5); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.step-title { font-weight: 700; color: #1565C0; font-size: 14px; }
+.step-desc { color: #666; font-size: 13px; margin-bottom: 8px; line-height: 1.6; }
+.formula-box { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 16px; margin: 8px 0; }
+.formula-math { font-family: "Consolas","Courier New",monospace; color: #1565C0; font-weight: 700; font-size: 14px; margin-bottom: 6px; word-break: break-all; }
+.formula-value { font-family: "Consolas","Courier New",monospace; color: #e65100; font-size: 13px; margin-bottom: 4px; }
+.formula-result { font-family: "Consolas","Courier New",monospace; color: #c0392b; font-weight: 700; font-size: 15px; background: #fff3e0; display: inline-block; padding: 3px 10px; border-radius: 3px; }
+.step-conclusion { font-size: 13px; color: #2e7d32; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+/* ===== 图表区域 ===== */
+.chart-section { margin-top: 24px; background: #fafbff; border: 1px solid #e0e8f0; border-radius: 8px; padding: 18px; }
+.chart-section-title { font-weight: 700; color: #1565C0; font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 720px) { .chart-grid { grid-template-columns: 1fr; } }
+.chart-container { background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 12px; position: relative; }
+.chart-container canvas { max-height: 300px; }
+.chart-label { font-size: 12px; color: #888; text-align: center; margin-top: 4px; font-weight: 600; }
+.chart-full { grid-column: 1 / -1; }
+
+.compute-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.compute-tag { background: #e8f5e9; color: #2e7d32; padding: 5px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.compute-tag.warn { background: #fff3e0; color: #e65100; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ===== LOGO 头部栏 ===== -->
+<div class="logo-header">
+    <div class="logo-inner">
+        <div class="logo-left">
+            <div class="logo-icon">☀️</div>
+            <div class="logo-text-block">
+                <div class="logo-title">南部区域技术部</div>
+                <div class="logo-subtitle">SOUTHERN REGION TECHNOLOGY DEPARTMENT</div>
+            </div>
+        </div>
+        <div class="logo-right">
+            <span class="logo-badge">光伏工具箱 v2.0</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 工具箱子导航 ===== -->
+<div class="toolbox-nav">
+    <div class="toolbox-nav-inner">
+        <a class="active" onclick="switchTool('breaker')">光伏断路器选型</a>
+        <a onclick="switchTool('cable')">光伏并网电缆选型</a>
+        <a onclick="switchTool('capacity')">装机容量快速估算</a>
+        <a onclick="switchTool('generation')">光伏发电量估算工具</a>
+        <a onclick="switchTool('storage')" style="color:#E65100">⚡ 储能计算器</a>
+    </div>
+</div>
+
+<!-- ===== 通知 ===== -->
+<div class="notification" id="notification"></div>
+
+<div class="page-content">
+
+<!-- ====================== 工具1: 断路器选型 ====================== -->
+<div class="tool-panel active" id="panel-breaker">
+<div class="tool-title-bar"><span class="icon">⚡</span><h1>0.4/10kV光伏并网断路器选型计算工具</h1></div>
+<div class="notice-card"><div class="notice-title">📋 符合GB/T 14048.2、GB/T 1984和DL/T 5222标准的专业选型计算</div><ol><li>支持0.4kV(低压)和10kV(中压)两种电压等级</li><li>支持自动选型和手动选型两种模式</li><li>可导出选型报告</li></ol></div>
+
+<!-- 断路器选型说明 -->
+<div class="sel-guide-toggle" id="breaker-guide-toggle" onclick="toggleGuide('breaker-guide')">
+    <span class="arrow">▶</span> 📖 光伏断路器选型说明
+</div>
+<div class="sel-guide-body" id="breaker-guide">
+    <div class="sel-guide-section">
+        <h3>一、电压等级选择</h3>
+        <p>根据光伏系统装机容量及并网方式选择对应电压等级：</p>
+        <table class="sel-guide-table">
+            <thead><tr><th>装机容量范围</th><th>推荐电压等级</th><th>适用场景</th><th>断路器类型</th></tr></thead>
+            <tbody>
+                <tr><td>&lt; 400kW</td><td><span class="sel-guide-tag ok">0.4kV</span></td><td>户用/小型工商业屋顶</td><td>塑壳断路器 (MCCB)</td></tr>
+                <tr><td>400kW ~ 2MW</td><td><span class="sel-guide-tag ok">0.4kV</span></td><td>中型工商业、低压并网</td><td>框架断路器 (ACB)</td></tr>
+                <tr><td>2MW ~ 10MW</td><td><span class="sel-guide-tag warn">10kV</span></td><td>大型工商业、专线接入</td><td>真空断路器 (VCB)</td></tr>
+                <tr><td>&gt; 10MW</td><td><span class="sel-guide-tag warn">10kV/35kV</span></td><td>大型地面电站</td><td>真空断路器 (VCB)</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="sel-guide-section">
+        <h3>二、关键参数说明</h3>
+        <ul>
+            <li><strong>额定功率P：</strong>光伏逆变器的总额定输出功率（kW），非组件功率。需考虑逆变器过载能力（一般为1.1倍）。</li>
+            <li><strong>功率因数cosφ：</strong>光伏逆变器通常运行在接近1.0的功率因数，典型取值 <span class="sel-guide-highlight">0.95~1.0</span>。若配有SVG无功补偿，可取0.98。</li>
+            <li><strong>短路容量Isc：</strong>并网点的最大三相短路电流，需向供电公司获取或按变压器容量估算。常见值：0.4kV系统 <span class="sel-guide-highlight">15~50kA</span>，10kV系统 <span class="sel-guide-highlight">12.5~31.5kA</span>。</li>
+            <li><strong>环境温度：</strong>影响断路器降容使用。标准环境温度40℃，每升高1℃，约降容0.5%~1%。</li>
+        </ul>
+    </div>
+    <div class="sel-guide-section">
+        <h3>三、选型模式说明</h3>
+        <ul>
+            <li><span class="sel-guide-tag ok">自动选型</span> 系统自动按 GB/T 14048.2 标准档位选取最接近且大于计算电流的额定值，适用于常规设计。</li>
+            <li><span class="sel-guide-tag info">手动选型</span> 可手动指定断路器额定电流，适用于有特殊要求或已有库存设备的场景。</li>
+        </ul>
+    </div>
+    <div class="sel-guide-section">
+        <h3>四、三段保护整定解读</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>保护类型</th><th>整定公式</th><th>作用</th><th>脱扣特性</th></tr></thead>
+            <tbody>
+                <tr><td>长延时 Ir</td><td>1.1 × In</td><td>过载保护</td><td>反时限 (I²t)，数秒~数分钟</td></tr>
+                <tr><td>短延时 Isd</td><td>5 × Ir</td><td>短路选择性保护</td><td>定时限 0.2s，与下级配合</td></tr>
+                <tr><td>瞬时 Ii</td><td>10 × In_b</td><td>近区短路速断</td><td>无延时 (&lt;20ms)</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:8px;font-size:12px;color:#888;">注：10kV中压系统瞬时保护取 6×In_b，动作时间 &lt;60ms。</p>
+    </div>
+    <div class="sel-guide-section">
+        <h3>五、推荐型号命名规则</h3>
+        <p>0.4kV示例：<span class="sel-guide-highlight">NM1-1600/36kA</span> → NM1(系列) + 1600(额定电流A) + 36kA(分断能力)</p>
+        <p>10kV示例：<span class="sel-guide-highlight">VS1-1250/31.5kA</span> → VS1(真空系列) + 1250(额定电流A) + 31.5kA(分断能力)</p>
+    </div>
+</div>
+
+<div class="tool-body">
+    <div class="voltage-tabs">
+        <div class="voltage-tab active" id="lv-btn" onclick="switchVoltage(0)">0.4kV（低压）</div>
+        <div class="voltage-tab" id="hv-btn" onclick="switchVoltage(1)">10kV（中压）</div>
+    </div>
+
+    <div class="params-grid">
+        <div class="param-section">
+            <div class="param-section-title">⚙️ 基本参数</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">额定功率P：</div><div class="param-input-wrap"><input type="number" id="bk-power" value="1000" step="1"><span class="param-unit">kW</span></div></div>
+                <div class="param-row lv-only"><div class="param-label">额定电压U：</div><div class="param-input-wrap"><input type="number" id="bk-voltage-lv" value="0.4" step="0.01"><span class="param-unit">kV</span></div></div>
+                <div class="param-row hv-only" style="display:none"><div class="param-label">额定电压U：</div><div class="param-input-wrap"><input type="number" id="bk-voltage-hv" value="10" step="0.1"><span class="param-unit">kV</span></div></div>
+                <div class="param-row"><div class="param-label">功率因数：</div><div class="param-input-wrap"><input type="number" id="bk-pf" value="0.95" min="0.5" max="1" step="0.01"></div></div>
+                <div class="param-row"><div class="param-label">短路容量：</div><div class="param-input-wrap"><input type="number" id="bk-sc" value="25" min="1" max="200" step="0.5"><span class="param-unit">kA</span></div></div>
+                <div class="param-row"><div class="param-label">环境温度：</div><div class="param-input-wrap"><select id="bk-temp"><option value="30">30℃</option><option value="35">35℃</option><option value="40" selected>40℃（标准）</option><option value="45">45℃</option><option value="50">50℃</option></select></div></div>
+            </div>
+        </div>
+
+        <div class="param-section">
+            <div class="param-section-title">🔧 选型方式</div>
+            <div class="param-section-body">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="auto-btn" onclick="setBreakerMode('auto')">自动选型</button>
+                    <button class="mode-btn" id="manual-btn" onclick="setBreakerMode('manual')">手动选型</button>
+                </div>
+                <div id="manual-panel" style="display:none">
+                    <div style="font-size:12px;color:#888;margin-bottom:6px">选择断路器额定电流：</div>
+                    <div class="breaker-option-grid" id="breaker-opts-lv">
+                        <div class="breaker-opt selected" data-val="800">800A</div><div class="breaker-opt" data-val="1000">1000A</div><div class="breaker-opt" data-val="1250">1250A</div><div class="breaker-opt" data-val="1600">1600A</div><div class="breaker-opt" data-val="2000">2000A</div><div class="breaker-opt" data-val="2500">2500A</div><div class="breaker-opt" data-val="3150">3150A</div><div class="breaker-opt" data-val="4000">4000A</div>
+                    </div>
+                    <div class="breaker-option-grid" id="breaker-opts-hv" style="display:none">
+                        <div class="breaker-opt selected" data-val="630">630A</div><div class="breaker-opt" data-val="800">800A</div><div class="breaker-opt" data-val="1000">1000A</div><div class="breaker-opt" data-val="1250">1250A</div><div class="breaker-opt" data-val="1600">1600A</div><div class="breaker-opt" data-val="2000">2000A</div><div class="breaker-opt" data-val="2500">2500A</div><div class="breaker-opt" data-val="3150">3150A</div><div class="breaker-opt" data-val="4000">4000A</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+        <button class="btn-primary" onclick="calcBreaker()">🔍 开始计算</button>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#78909c,#90a4ae);margin-left:8px" onclick="resetBreaker()">🔄 重置</button>
+        <button class="btn-export" style="display:inline-flex;margin-left:8px" onclick="exportBreakerReport()">📥 导出报告</button>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-card"><div class="rc-label">计算电流 In</div><div class="rc-value" id="bk-current">1519.3</div><div class="rc-detail">A</div></div>
+        <div class="result-card"><div class="rc-label">断路器额定电流</div><div class="rc-value" id="bk-breaker">1600</div><div class="rc-detail">A</div></div>
+        <div class="result-card"><div class="rc-label">短路分断能力</div><div class="rc-value" id="bk-icu">36</div><div class="rc-detail">kA</div></div>
+        <div class="result-card"><div class="rc-label">长延时保护 Ir</div><div class="rc-value" id="bk-long">1671</div><div class="rc-detail">A</div></div>
+        <div class="result-card"><div class="rc-label">短延时保护 Isd</div><div class="rc-value" id="bk-short">8356</div><div class="rc-detail">A / 0.2s</div></div>
+        <div class="result-card"><div class="rc-label">瞬时保护 Ii</div><div class="rc-value" id="bk-instant">16000</div><div class="rc-detail">A</div></div>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:#e8f0fe;border-radius:6px;font-size:14px;">
+        <strong>推荐型号：</strong><span id="bk-model" style="color:#c0392b;font-weight:700;font-size:16px;">NM1-1600/36kA</span>
+        <span style="margin-left:12px;font-size:12px;color:#888;" id="bk-mode-note">自动选型模式</span>
+    </div>
+
+    <!-- 计算推导过程 -->
+    <div style="margin-top:20px;">
+        <div class="process-toggle" id="breaker-process-toggle" onclick="toggleProcess('breaker-process')">
+            <span class="arrow">▶</span> 📐 查看计算推导过程
+        </div>
+        <div class="process-body" id="breaker-process">
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">1</div><div class="step-title">计算额定电流 In</div></div>
+                <div class="step-desc">根据三相交流功率公式，计算光伏系统在额定工况下的线电流：</div>
+                <div class="formula-box">
+                    <div class="formula-math">In = P / (√3 × U × cosφ)</div>
+                    <div class="formula-value" id="bk-step1-formula">= 1000 / (1.732 × 0.4 × 0.95)</div>
+                    <div class="formula-result" id="bk-step1-result">= 1519.3 A</div>
+                </div>
+                <div class="step-conclusion">✅ 计算电流 <span id="bk-step1-current">1519.3</span> A</div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">2</div><div class="step-title">断路器额定电流选型（自动模式）</div></div>
+                <div class="step-desc">根据 GB/T 14048.2 标准档位，选取 <b>大于且最接近</b> 计算电流的标准电流档位：</div>
+                <div class="formula-box">
+                    <div class="formula-math">标准档位: [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000] A</div>
+                    <div class="formula-value" id="bk-step2-search">1519.3 A → 下一档位 → 1600 A</div>
+                    <div class="formula-result" id="bk-step2-result">断路器额定电流 In_b = 1600 A</div>
+                </div>
+                <div class="step-conclusion">✅ 选定断路器额定电流 <span id="bk-step2-breaker">1600</span> A</div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">3</div><div class="step-title">短路分断能力选择</div></div>
+                <div class="step-desc">按 <b>1.2倍</b> 安全系数选取，确保断路器能可靠分断最大短路电流：</div>
+                <div class="formula-box">
+                    <div class="formula-math">Icu_要求 ≥ 1.2 × Isc = 1.2 × 短路容量</div>
+                    <div class="formula-value" id="bk-step3-formula">= 1.2 × 25 = 30 kA</div>
+                    <div class="formula-value">标准分断能力档位: [25, 36, 42, 50, 65, 85, 100] kA</div>
+                    <div class="formula-result" id="bk-step3-result">Icu = 36 kA (≥ 30 kA)</div>
+                </div>
+                <div class="step-conclusion">✅ 分断能力 <span id="bk-step3-icu">36</span> kA</div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">4</div><div class="step-title">保护整定值计算</div></div>
+                <div class="step-desc">根据 IEC/GB 标准计算三段保护整定值：</div>
+                <div class="formula-box">
+                    <div class="formula-math">长延时保护 Ir = 1.1 × In （反时限特性）</div>
+                    <div class="formula-value" id="bk-step4a">= 1.1 × 1519.3 = 1671 A</div>
+                    <div class="formula-math" style="margin-top:8px">短延时保护 Isd = 5 × Ir （0.2s 延时）</div>
+                    <div class="formula-value" id="bk-step4b">= 5 × 1671 = 8356 A</div>
+                    <div class="formula-math" style="margin-top:8px">瞬时保护 Ii = 10 × In_b （无延时脱扣）</div>
+                    <div class="formula-value" id="bk-step4c">= 10 × 1600 = 16000 A</div>
+                </div>
+                <div class="compute-summary">
+                    <div class="compute-tag">📏 Ir: <span id="bk-step4-ir">1671</span> A</div>
+                    <div class="compute-tag">⚡ Isd: <span id="bk-step4-isd">8356</span> A</div>
+                    <div class="compute-tag warn">🔴 Ii: <span id="bk-step4-ii">16000</span> A</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="chart-section">
+        <div class="chart-section-title">📊 保护整定值对比</div>
+        <div class="chart-container"><canvas id="breaker-chart"></canvas></div>
+        <div class="chart-label">计算电流 In | 长延时 Ir | 短延时 Isd | 瞬时保护 Ii</div>
+    </div>
+</div>
+</div>
+
+<!-- ====================== 工具2: 电缆选型 ====================== -->
+<div class="tool-panel" id="panel-cable">
+<div class="tool-title-bar"><span class="icon">🔌</span><h1>光伏并网电缆选型计算工具</h1></div>
+<div class="notice-card"><div class="notice-title">📋 符合GB 50217、DL/T 5222标准的电缆选型计算</div><ol><li>支持铜芯、铝芯电缆选择</li><li>考虑载流量、电压降、温度修正、敷设方式修正</li><li>适用于光伏并网交流及直流电缆选型</li></ol></div>
+
+<!-- 电缆选型说明 -->
+<div class="sel-guide-toggle" id="cable-guide-toggle" onclick="toggleGuide('cable-guide')">
+    <span class="arrow">▶</span> 📖 光伏并网电缆选型说明
+</div>
+<div class="sel-guide-body" id="cable-guide">
+    <div class="sel-guide-section">
+        <h3>一、电缆材质选择</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>对比维度</th><th>铜芯电缆 (YJV)</th><th>铝芯电缆 (YJLV)</th></tr></thead>
+            <tbody>
+                <tr><td>导电率</td><td>高（电阻低约40%）</td><td>较低</td></tr>
+                <tr><td>同截面载流量</td><td>高（基准）</td><td>约为铜芯的 58%~72%</td></tr>
+                <tr><td>重量</td><td>重</td><td>轻（约为铜的30%）</td></tr>
+                <tr><td>成本</td><td>高</td><td>低（约为铜的30%~50%）</td></tr>
+                <tr><td><span class="sel-guide-tag ok">推荐场景</span></td><td>重要回路、大电流、空间受限</td><td>长距离、成本敏感、空间充裕</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:8px;font-size:12px;color:#888;">光伏并网推荐：截面≤120mm² 可选用铝芯以降低成本，截面≥150mm² 优先铜芯以确保可靠性。</p>
+    </div>
+    <div class="sel-guide-section">
+        <h3>二、敷设方式与修正系数</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>敷设方式</th><th>散热条件</th><th>载流量修正系数</th><th>适用场景</th></tr></thead>
+            <tbody>
+                <tr><td><span class="sel-guide-tag ok">空气中（桥架）</span></td><td>良好</td><td>1.00（基准）</td><td>室内/电缆沟，光伏常用</td></tr>
+                <tr><td><span class="sel-guide-tag info">空气中（梯架）</span></td><td>更优</td><td>1.05</td><td>通风良好场所</td></tr>
+                <tr><td><span class="sel-guide-tag warn">穿管（墙内）</span></td><td>较差</td><td>0.80</td><td>埋墙/穿管暗敷</td></tr>
+                <tr><td><span class="sel-guide-tag warn">直埋土壤中</span></td><td>一般</td><td>0.85~0.95</td><td>户外直埋敷设</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="sel-guide-section">
+        <h3>三、温度修正系数（40℃基准）</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>环境温度</th><th>25℃</th><th>30℃</th><th>35℃</th><th>40℃（基准）</th><th>45℃</th><th>50℃</th></tr></thead>
+            <tbody>
+                <tr><td>修正系数 Kt</td><td>1.10</td><td>1.05</td><td>0.97</td><td><strong>0.91</strong></td><td>0.84</td><td>0.77</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:6px;font-size:12px;color:#888;">注：高温环境或日照直射处应选用更高一级截面或采取遮阳措施。</p>
+    </div>
+    <div class="sel-guide-section">
+        <h3>四、并列回路修正系数</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>并列回路数</th><th>1路</th><th>2路</th><th>3路</th><th>4路</th><th>5路及以上</th></tr></thead>
+            <tbody>
+                <tr><td>修正系数 Kg</td><td>1.00</td><td>0.80</td><td>0.73</td><td>0.65</td><td>0.60</td></tr>
+            </tbody>
+        </table>
+        <p style="margin-top:6px;font-size:12px;color:#f57c00;">⚠ 多回路并列敷设时相互加热影响显著，必须计入此修正。</p>
+    </div>
+    <div class="sel-guide-section">
+        <h3>五、电压降要求</h3>
+        <ul>
+            <li><strong>光伏并网点：</strong>电压偏差不超过额定电压的 <span class="sel-guide-highlight">±5%</span></li>
+            <li><strong>逆变器至并网点电缆：</strong>推荐压降 ≤ <span class="sel-guide-highlight">3%</span></li>
+            <li><strong>组件至逆变器直流电缆：</strong>推荐压降 ≤ <span class="sel-guide-highlight">1%</span></li>
+            <li><strong>电压降公式：</strong>交流三相 ΔU% = I × L × (Rcosφ + Xsinφ) × √3 / U × 100%</li>
+        </ul>
+    </div>
+    <div class="sel-guide-section">
+        <h3>六、交/直流选型差异</h3>
+        <table class="sel-guide-table">
+            <thead><tr><th>对比项</th><th>交流电缆</th><th>直流电缆</th></tr></thead>
+            <tbody>
+                <tr><td>载流量计算</td><td>I = P/(√3×U×cosφ)</td><td>I = P/U</td></tr>
+                <tr><td>集肤效应</td><td>有（大截面时显著）</td><td>无</td></tr>
+                <tr><td>电缆结构</td><td>3芯/4芯/5芯</td><td>2芯（正负极）</td></tr>
+                <tr><td>适用标准</td><td>GB 50217</td><td>GB/T 16895.6、NB/T 42073</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="tool-body">
+    <div class="params-grid">
+        <div class="param-section">
+            <div class="param-section-title">⚙️ 基本参数</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">额定功率：</div><div class="param-input-wrap"><input type="number" id="cb-power" value="1000" step="1"><span class="param-unit">kW</span></div></div>
+                <div class="param-row"><div class="param-label">额定电压：</div><div class="param-input-wrap"><select id="cb-voltage"><option value="0.4">0.4kV（交流）</option><option value="10">10kV（交流）</option><option value="0.8">800V（直流）</option><option value="1.5">1500V（直流）</option></select></div></div>
+                <div class="param-row"><div class="param-label">功率因数：</div><div class="param-input-wrap"><input type="number" id="cb-pf" value="1.0" min="0.5" max="1" step="0.01"><span class="param-unit" style="font-size:11px;color:#aaa">（直流为1.0）</span></div></div>
+                <div class="param-row"><div class="param-label">电缆长度：</div><div class="param-input-wrap"><input type="number" id="cb-length" value="100" min="1" max="10000" step="1"><span class="param-unit">m</span></div></div>
+                <div class="param-row"><div class="param-label">允许压降：</div><div class="param-input-wrap"><input type="number" id="cb-vdrop" value="3" min="0.5" max="10" step="0.5"><span class="param-unit">%</span></div></div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">🔧 敷设条件</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">电缆材质：</div><div class="param-input-wrap"><select id="cb-material"><option value="cu">铜芯</option><option value="al">铝芯</option></select></div></div>
+                <div class="param-row"><div class="param-label">环境温度：</div><div class="param-input-wrap"><select id="cb-temp"><option value="25">25℃</option><option value="30">30℃</option><option value="35">35℃</option><option value="40" selected>40℃</option><option value="45">45℃</option></select></div></div>
+                <div class="param-row"><div class="param-label">敷设方式：</div><div class="param-input-wrap"><select id="cb-install"><option value="a1">空气中（桥架）</option><option value="a2">空气中（梯架）</option><option value="b1">穿管（墙内）</option><option value="d1">直埋土壤中</option></select></div></div>
+                <div class="param-row"><div class="param-label">并列回路数：</div><div class="param-input-wrap"><select id="cb-circuits"><option value="1">1路</option><option value="2">2路</option><option value="3">3路</option><option value="4">4路</option><option value="5">5路及以上</option></select></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+        <button class="btn-primary" onclick="calcCable()">🔍 开始计算</button>
+        <button class="btn-export" style="display:inline-flex;margin-left:8px" onclick="exportCableResult()">📥 导出结果</button>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-card"><div class="rc-label">计算电流</div><div class="rc-value" id="cb-current">1443.4</div><div class="rc-detail">A</div></div>
+        <div class="result-card"><div class="rc-label">推荐截面</div><div class="rc-value" id="cb-section">300</div><div class="rc-detail">mm²</div></div>
+        <div class="result-card"><div class="rc-label">载流量（修正后）</div><div class="rc-value" id="cb-ampacity">1520</div><div class="rc-detail">A</div></div>
+        <div class="result-card"><div class="rc-label">实际电压降</div><div class="rc-value" id="cb-vdrop-actual">1.85</div><div class="rc-detail">%</div></div>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:#e8f0fe;border-radius:6px;font-size:14px;" id="cb-result-box">
+        <strong>推荐：</strong><span id="cb-recommend" style="color:#c0392b;font-weight:700;font-size:16px;">YJV-0.6/1kV 3×300+1×150</span>
+    </div>
+
+    <!-- 0.6/1kV电缆参数表 -->
+    <div style="margin-top:24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div class="reference-title">📋 0.6/1kV 电力电缆技术参数表</div>
+            <span style="font-size:11px;color:#aaa;">（依据 GB/T 12706.1-2020）</span>
+        </div>
+        <div class="cable-table-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <!-- 铜芯电缆 -->
+            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#1565C0,#42A5F5);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;text-align:center;">
+                    🟠 铜芯电缆（YJV-0.6/1kV）
+                </div>
+                <div class="table-scroll-wrap">
+                    <table class="ref-table" style="min-width:100%;">
+                        <thead><tr><th>截面<br>(mm²)</th><th>空气中载流量<br>40℃ (A)</th><th>20℃直流电阻<br>(Ω/km)</th><th>近似电抗<br>(Ω/km)</th></tr></thead>
+                        <tbody>
+                            <tr><td>10</td><td>59</td><td>1.830</td><td>0.100</td></tr>
+                            <tr><td>16</td><td>79</td><td>1.150</td><td>0.095</td></tr>
+                            <tr><td>25</td><td>106</td><td>0.727</td><td>0.092</td></tr>
+                            <tr><td>35</td><td>130</td><td>0.524</td><td>0.090</td></tr>
+                            <tr><td>50</td><td>160</td><td>0.387</td><td>0.089</td></tr>
+                            <tr><td>70</td><td>199</td><td>0.268</td><td>0.086</td></tr>
+                            <tr><td>95</td><td>238</td><td>0.193</td><td>0.084</td></tr>
+                            <tr><td>120</td><td>277</td><td>0.153</td><td>0.082</td></tr>
+                            <tr><td>150</td><td>321</td><td>0.124</td><td>0.081</td></tr>
+                            <tr><td>185</td><td>373</td><td>0.0991</td><td>0.080</td></tr>
+                            <tr><td>240</td><td>442</td><td>0.0754</td><td>0.079</td></tr>
+                            <tr><td>300</td><td>520</td><td>0.0601</td><td>0.078</td></tr>
+                            <tr><td>400</td><td>624</td><td>0.0470</td><td>0.077</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- 铝芯电缆 -->
+            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#546E7A,#90A4AE);color:#fff;padding:10px 14px;font-weight:700;font-size:14px;text-align:center;">
+                    ⚪ 铝芯电缆（YJLV-0.6/1kV）
+                </div>
+                <div class="table-scroll-wrap">
+                    <table class="ref-table" style="min-width:100%;">
+                        <thead><tr><th>截面<br>(mm²)</th><th>空气中载流量<br>40℃ (A)</th><th>20℃直流电阻<br>(Ω/km)</th><th>近似电抗<br>(Ω/km)</th></tr></thead>
+                        <tbody>
+                            <tr><td>16</td><td>47</td><td>1.910</td><td>0.095</td></tr>
+                            <tr><td>25</td><td>63</td><td>1.200</td><td>0.092</td></tr>
+                            <tr><td>35</td><td>78</td><td>0.868</td><td>0.090</td></tr>
+                            <tr><td>50</td><td>101</td><td>0.641</td><td>0.089</td></tr>
+                            <tr><td>70</td><td>124</td><td>0.443</td><td>0.086</td></tr>
+                            <tr><td>95</td><td>153</td><td>0.320</td><td>0.084</td></tr>
+                            <tr><td>120</td><td>177</td><td>0.253</td><td>0.082</td></tr>
+                            <tr><td>150</td><td>206</td><td>0.206</td><td>0.081</td></tr>
+                            <tr><td>185</td><td>237</td><td>0.164</td><td>0.080</td></tr>
+                            <tr><td>240</td><td>279</td><td>0.125</td><td>0.079</td></tr>
+                            <tr><td>300</td><td>321</td><td>0.100</td><td>0.078</td></tr>
+                            <tr><td>400</td><td>381</td><td>0.0778</td><td>0.077</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:8px;padding:6px 12px;background:#fffde7;border-radius:4px;font-size:12px;color:#f57c00;">
+            💡 注：载流量为空气中敷设（桥架），环境温度40℃基准。其他敷设方式需乘以相应修正系数。30℃时可乘以 1.15（1.05/0.91）换算。
+        </div>
+    </div>
+
+    <!-- 计算推导过程 -->
+    <div style="margin-top:20px;">
+        <div class="process-toggle" id="cable-process-toggle" onclick="toggleProcess('cable-process')">
+            <span class="arrow">▶</span> 📐 查看计算推导过程
+        </div>
+        <div class="process-body" id="cable-process">
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">1</div><div class="step-title">计算工作电流 I</div></div>
+                <div class="step-desc">根据系统功率、电压和功率因数计算回路工作电流：</div>
+                <div class="formula-box">
+                    <div class="formula-math">交流: I = P / (√3 × U × cosφ)　　直流: I = P / U</div>
+                    <div class="formula-value" id="cb-step1-formula">= 1000 / (1.732 × 0.4 × 1.0)</div>
+                    <div class="formula-result" id="cb-step1-result">= 1443.4 A</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">2</div><div class="step-title">综合修正系数 K</div></div>
+                <div class="step-desc">考虑环境温度和并列敷设回路数的影响：</div>
+                <div class="formula-box">
+                    <div class="formula-math">K = Kt × Kg</div>
+                    <div class="formula-value">温度修正 Kt（40℃）= 0.91</div>
+                    <div class="formula-value">并列回路修正 Kg = <span id="cb-step2-kg">0.73</span></div>
+                    <div class="formula-result" id="cb-step2-result">K = 0.91 × 0.73 = 0.664</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">3</div><div class="step-title">修正后计算电流 I'</div></div>
+                <div class="step-desc">将工作电流除以综合修正系数，得到等效选型电流：</div>
+                <div class="formula-box">
+                    <div class="formula-math">I' = I / K</div>
+                    <div class="formula-value" id="cb-step3-formula">= 1443.4 / 0.664</div>
+                    <div class="formula-result" id="cb-step3-result">= 2172.8 A</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">4</div><div class="step-title">电缆截面选择</div></div>
+                <div class="step-desc">选择载流量 ≥ I' 的电缆截面（铜芯/空气中-桥架敷设）：</div>
+                <div class="formula-box">
+                    <div class="formula-math">查找载流量表中 ≥ I' 的最小截面</div>
+                    <div class="formula-value" id="cb-step4-search">2172.8 A → 匹配截面 → 300 mm²（载流量 600 A）</div>
+                    <div class="formula-value" style="color:#e65100;font-size:12px;">⚠ 单根电缆无法满足，推荐采用多根并联或增大电压等级</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">5</div><div class="step-title">电压降校核</div></div>
+                <div class="step-desc">按 GB 50217 标准校核线路电压降是否在允许范围内：</div>
+                <div class="formula-box">
+                    <div class="formula-math">ΔU% = I × ρ × L × √3 / (U × S) × 100</div>
+                    <div class="formula-value" id="cb-step5-formula">= 1443.4 × 0.0185 × 100 × 1.732 / (400 × 300) × 100</div>
+                    <div class="formula-result" id="cb-step5-result">= 1.85%</div>
+                </div>
+                <div class="step-conclusion" id="cb-step5-ok">✅ 电压降 1.85% ≤ 允许值 3%，满足要求</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="chart-section">
+        <div class="chart-section-title">📊 电缆选型可视化</div>
+        <div class="chart-grid">
+            <div class="chart-container"><canvas id="cable-ampacity-chart"></canvas><div class="chart-label">电缆截面 vs 载流量曲线（铜芯-空气中）</div></div>
+            <div class="chart-container"><canvas id="cable-vdrop-chart"></canvas><div class="chart-label">各截面电压降对比</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ====================== 工具3: 装机容量估算 ====================== -->
+<div class="tool-panel" id="panel-capacity">
+<div class="tool-title-bar"><span class="icon">🏭</span><h1>屋顶容量快速估算工具</h1></div>
+<div class="notice-card"><div class="notice-title">📋 使用说明</div><ol><li><span style="background:#fffde7;padding:1px 5px;border-radius:3px;color:#888;font-size:12px;">黄色区域</span>为输入，<span style="color:#c0392b;font-weight:700;">红色字体</span>为输出</li><li>平屋顶安装时需考虑倾角导致的阴影和间距</li></ol></div>
+
+<div class="tool-body">
+    <div class="params-grid">
+        <div class="param-section">
+            <div class="param-section-title">⚙️ 屋顶参数（全局）</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">当地纬度：</div><div class="param-input-wrap"><input type="number" id="ct-lat" value="22.8" min="0" max="55" step="0.1"><span class="param-unit">°</span></div></div>
+                <div class="param-row"><div class="param-label">屋顶类别：</div><div class="param-input-wrap"><select id="ct-type" onchange="onRoofTypeChange()"><option value="彩钢瓦">彩钢瓦</option><option value="平屋顶">平屋顶</option></select></div></div>
+                <div class="param-row" id="ct-angle-row" style="opacity:0.4;pointer-events:none;"><div class="param-label">方阵倾角：</div><div class="param-input-wrap"><input type="number" id="ct-angle" value="15" min="0" max="60" step="1"><span class="param-unit">°（仅平屋顶）</span></div></div>
+                <div class="param-row"><div class="param-label">利用系数：</div><div class="param-input-wrap"><input type="number" id="ct-factor" value="0.7" min="0.01" max="1" step="0.05"></div></div>
+                <div class="param-hint">彩钢瓦：0.3~0.8；混凝土：0.6~0.95</div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">🔲 组件参数</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">组件长度：</div><div class="param-input-wrap"><input type="number" id="ct-ml" value="2278" step="1"><span class="param-unit">mm</span></div></div>
+                <div class="param-row"><div class="param-label">组件宽度：</div><div class="param-input-wrap"><input type="number" id="ct-mw" value="1134" step="1"><span class="param-unit">mm</span></div></div>
+                <div class="param-row"><div class="param-label">组件厚度：</div><div class="param-input-wrap"><input type="number" id="ct-mh" value="35" step="1"><span class="param-unit">mm</span></div></div>
+                <div class="param-row"><div class="param-label">组件功率：</div><div class="param-input-wrap"><input type="number" id="ct-mp" value="580" step="5"><span class="param-unit">W</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="add-factory-card">
+        <div class="add-factory-title">🏗️ 添加厂房</div>
+        <div class="add-factory-row">
+            <div class="field"><label>厂房名称</label><input type="text" id="ct-fname" placeholder="如：主厂房" style="width:150px;background:#fffde7;"></div>
+            <div class="field"><label>屋顶面积（㎡）</label><input type="number" id="ct-farea" placeholder="如：5000" min="1" step="1" style="background:#fffde7;"></div>
+            <div class="field" style="align-self:flex-end;"><button class="btn-primary" onclick="addFactory()">➕ 添加厂房</button></div>
+        </div>
+    </div>
+
+    <div class="result-section">
+        <div class="result-header"><div class="result-title">📊 厂房列表</div><button class="btn-export" onclick="exportCapacityExcel()">📥 导出Excel</button></div>
+        <p class="example-note" id="ct-note">以下是示例数据</p>
+        <div class="table-scroll-wrap">
+            <table class="result-table" id="ct-table">
+                <thead><tr><th>编号</th><th>厂房名称</th><th>屋顶类别</th><th>倾角(°)</th><th>面积(㎡)</th><th>利用系数</th><th>容量(kW)</th><th>操作</th></tr></thead>
+                <tbody id="ct-list"></tbody>
+                <tfoot><tr><td colspan="4">总计：</td><td id="ct-total-area">0</td><td></td><td id="ct-total-kw" class="output-cell">0.00</td><td></td></tr></tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="reference-section"><div class="reference-title">📌 彩钢瓦屋顶利用系数参考</div>
+        <div class="table-scroll-wrap"><table class="ref-table"><thead><tr><th>序号</th><th>情况</th><th>参考系数</th></tr></thead><tbody><tr><td>1</td><td>无女儿墙、无采光、无通风设备</td><td>0.7~0.8</td></tr><tr><td>2</td><td>有女儿墙、有采光、无通风设备</td><td>0.5~0.7</td></tr><tr><td>3</td><td>有女儿墙、有采光、有通风设备</td><td>0.3~0.5</td></tr></tbody></table></div></div>
+    <div class="reference-section"><div class="reference-title">📌 混凝土屋顶利用系数参考</div>
+        <div class="table-scroll-wrap"><table class="ref-table"><thead><tr><th>序号</th><th>情况</th><th>参考系数</th></tr></thead><tbody><tr><td>1</td><td>有女儿墙，无其他</td><td>0.9~0.95</td></tr><tr><td>2</td><td>有女儿墙、电梯间或楼梯间，无其他</td><td>0.8~0.9</td></tr><tr><td>3</td><td>有女儿墙、电梯间、屋面管道，无其他</td><td>0.7~0.8</td></tr><tr><td>4</td><td>有女儿墙、电梯间、屋面管道及其他遮挡物</td><td>0.7以下</td></tr></tbody></table></div></div>
+</div>
+</div>
+
+<!-- ====================== 工具4: 发电量估算 ====================== -->
+<div class="tool-panel" id="panel-generation">
+<div class="tool-title-bar"><span class="icon">☀️</span><h1>光伏发电量估算工具</h1></div>
+<div class="notice-card"><div class="notice-title">📋 全国城市日照数据 - 数据来源NASA</div><ol><li>先搜索选择城市获取日照数据</li><li>输入系统容量和效率参数</li><li>点击计算获取月度/年度发电量</li></ol></div>
+
+<div class="tool-body">
+    <div style="font-size:13px;font-weight:700;color:#555;margin-bottom:8px;">🔍 日照数据查询</div>
+    <div class="search-box">
+        <input type="text" id="gen-search" placeholder="搜索城市名称，如：北京、上海、深圳..." oninput="searchCity()">
+        <button class="btn-primary" onclick="searchCity()">查询日照数据</button>
+    </div>
+    <div class="search-results" id="gen-results"></div>
+    <div id="gen-selected" style="margin-bottom:16px;display:none;">
+        <div style="font-size:12px;color:#1565C0;font-weight:600;margin-bottom:8px;">✅ 已选城市：<span id="gen-city-name"></span> | 年均峰值日照：<span id="gen-avg" style="color:#c0392b;"></span> h/天</div>
+        <div class="monthly-grid" id="gen-monthly"></div>
+    </div>
+
+    <div class="params-grid">
+        <div class="param-section">
+            <div class="param-section-title">⚙️ 参数设置</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">系统容量：</div><div class="param-input-wrap"><input type="number" id="gen-capacity" value="1000" step="1"><span class="param-unit">kW</span></div></div>
+                <div class="param-row"><div class="param-label">系统效率：</div><div class="param-input-wrap"><input type="number" id="gen-efficiency" value="80" min="50" max="100" step="1"><span class="param-unit">%</span></div></div>
+                <div class="param-row"><div class="param-label">电价：</div><div class="param-input-wrap"><input type="number" id="gen-price" value="0.4" min="0" max="2" step="0.01"><span class="param-unit">元/kWh</span></div></div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">📊 估算结果</div>
+            <div class="param-section-body">
+                <div class="param-row"><div class="param-label">日均发电量：</div><div class="param-input-wrap"><strong id="gen-daily" style="color:#c0392b;font-size:18px;">0.00</strong><span class="param-unit">kWh/天</span></div></div>
+                <div class="param-row"><div class="param-label">年发电量：</div><div class="param-input-wrap"><strong id="gen-yearly" style="color:#c0392b;font-size:18px;">0.00</strong><span class="param-unit">万kWh/年</span></div></div>
+                <div class="param-row"><div class="param-label">年收益：</div><div class="param-input-wrap"><strong id="gen-revenue" style="color:#1565C0;font-size:18px;">0.00</strong><span class="param-unit">万元</span></div></div>
+                <div class="param-row"><div class="param-label">年CO₂减排：</div><div class="param-input-wrap"><strong id="gen-co2" style="color:#43a047;font-size:18px;">0.00</strong><span class="param-unit">吨</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin:12px 0"><button class="btn-primary" onclick="calcGeneration()">🔍 计算发电量</button></div>
+
+    <div style="font-size:13px;font-weight:700;color:#555;margin:16px 0 8px;">📈 月度发电量分布 (kWh)</div>
+    <div class="monthly-grid" id="gen-monthly-result"></div>
+
+    <!-- 计算推导过程 -->
+    <div style="margin-top:20px;">
+        <div class="process-toggle" id="gen-process-toggle" onclick="toggleProcess('gen-process')">
+            <span class="arrow">▶</span> 📐 查看计算推导过程
+        </div>
+        <div class="process-body" id="gen-process">
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">1</div><div class="step-title">获取峰值日照小时数 H</div></div>
+                <div class="step-desc">查询所选城市的 NASA 日照数据库，获取各月日均峰值日照小时数。</div>
+                <div class="formula-box">
+                    <div class="formula-math">H = 日均峰值日照小时数（h/天）</div>
+                    <div class="formula-value">数据来源: NASA POWER (Prediction of Worldwide Energy Resources)</div>
+                    <div class="formula-value" id="gen-step1-city">城市: 北京 | 年均: 4.46 h/天</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">2</div><div class="step-title">月度发电量计算 E_month</div></div>
+                <div class="step-desc">逐月计算发电量，考虑系统容量、日照小时和系统效率：</div>
+                <div class="formula-box">
+                    <div class="formula-math">E_month = P × H_month × D_month × η</div>
+                    <div class="formula-value">其中: P=系统容量(kW) | H=月均日照(h/天) | D=当月天数 | η=系统效率</div>
+                    <div class="formula-value" id="gen-step2-example">示例(1月): 1000 × 2.79 × 31 × 0.80 = 69,192 kWh</div>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-header"><div class="step-number">3</div><div class="step-title">汇总年发电量及收益</div></div>
+                <div class="step-desc">累加12个月发电量，计算年度收益和减排量：</div>
+                <div class="formula-box">
+                    <div class="formula-math">E_year = Σ E_month(i)　　　i = 1月~12月</div>
+                    <div class="formula-value">年收益 = E_year × 电价</div>
+                    <div class="formula-value">CO₂减排 = E_year × 0.785 kg/kWh（全国电网平均排放因子）</div>
+                </div>
+                <div class="compute-summary" id="gen-step3-tags">
+                    <div class="compute-tag">⚡ 年发电: <span id="gen-tag-yearly">0.00</span> 万kWh</div>
+                    <div class="compute-tag">💰 年收益: <span id="gen-tag-revenue">0.00</span> 万元</div>
+                    <div class="compute-tag warn">🌿 CO₂减排: <span id="gen-tag-co2">0.00</span> 吨</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="chart-section">
+        <div class="chart-section-title">📊 发电量可视化分析</div>
+        <div class="chart-grid">
+            <div class="chart-container"><canvas id="gen-sunshine-chart"></canvas><div class="chart-label">月度日均峰值日照小时 (h/天)</div></div>
+            <div class="chart-container"><canvas id="gen-monthly-chart"></canvas><div class="chart-label">月度发电量分布 (kWh)</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+</div><!-- /page-content -->
+
+<!-- ====================== 工具5: 储能计算器 ====================== -->
+<div class="tool-panel" id="panel-storage">
+<div class="tool-title-bar"><span class="icon">⚡</span><h1>储能计算器</h1></div>
+<div class="notice-card"><div class="notice-title">📋 储能系统全生命周期经济性评估工具</div><ol><li>全寿命度电成本 (LCOS) — 评估储能技术经济性核心指标</li><li>年投资回报率 (ROI) — 工商业储能项目收益测算</li><li>储能解决方案模拟器 (SaaS) — 24h 发用电匹配模拟</li></ol></div>
+
+<!-- 选型说明 -->
+<div class="sel-guide-toggle" id="storage-guide-toggle" onclick="toggleGuide('storage-guide')">
+    <span class="arrow">▶</span> 📖 储能计算器使用说明
+</div>
+<div class="sel-guide-body" id="storage-guide">
+    <div class="sel-guide-section">
+        <h3>一、LCOS（全寿命度电成本）</h3>
+        <p>LCOS 是衡量储能系统经济性的核心指标，表示在全生命周期内，每放出一度电的综合成本。数值越低，经济性越好。</p>
+        <div class="formula-box" style="margin-top:8px">
+            <div class="formula-math">LCOS = Σ[Cost_t / (1+R)^t] / Σ[E_out_t / (1+R)^t]</div>
+            <div class="formula-value">分子：全寿命总成本折现值（初始投资 + 各年运维费用折现）</div>
+            <div class="formula-value">分母：全寿命总放电量折现值（各年放电量折现）</div>
+        </div>
+    </div>
+    <div class="sel-guide-section">
+        <h3>二、年投资回报率 (ROI)</h3>
+        <p>适用于工商业储能项目经济性评估，核心逻辑为峰谷套利：</p>
+        <div class="formula-box" style="margin-top:8px">
+            <div class="formula-math">ROI = (年净收益 / 初始投资) × 100%</div>
+            <div class="formula-value">年净收益 = 峰谷套利收入 - 运维成本 - 贷款利息</div>
+            <div class="formula-value">峰谷套利 = N_cycles × E_cap × η × (P_sell - P_buy)</div>
+        </div>
+    </div>
+    <div class="sel-guide-section">
+        <h3>三、储能解决方案模拟器</h3>
+        <p>基于24小时负荷曲线和发电曲线，模拟储能充放电策略，评估储能配置方案的可行性。</p>
+    </div>
+</div>
+
+<!-- 储能子工具标签 -->
+<div class="es-subtabs">
+    <div class="es-subtab active" onclick="switchES('lcos')">💰 全寿命度电成本 (LCOS)</div>
+    <div class="es-subtab" onclick="switchES('roi')">📈 年投资回报率 (ROI)</div>
+    <div class="es-subtab" onclick="switchES('saas')">🔋 储能解决方案模拟器</div>
+</div>
+
+<!-- ===== LCOS 面板 ===== -->
+<div class="es-panel active" id="es-lcos">
+<div class="tool-body">
+    <!-- 预设方案 -->
+    <div class="param-section" style="margin-bottom:16px">
+        <div class="param-section-title">⚡ 快速预设方案</div>
+        <div class="param-section-body">
+            <div class="es-preset-grid" id="lcos-presets">
+                <div class="es-preset-btn" data-preset="li">🔋 锂电池</div>
+                <div class="es-preset-btn" data-preset="vrb">🔵 全钒液流电池</div>
+                <div class="es-preset-btn" data-preset="nfb">🟢 新型液流电池</div>
+                <div class="es-preset-btn" data-preset="caes">🗜️ 压缩空气储能</div>
+                <div class="es-preset-btn active" data-preset="custom">⚙️ 自定义</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="es-param-grid">
+        <div class="param-section">
+            <div class="param-section-title">📐 系统参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">额定功率 P</span><input class="es-param-input" id="lcos-power" value="10" type="number" step="0.1"><span class="es-param-unit">MW</span></div>
+                <div class="es-param-row"><span class="es-param-label">放电时长 D</span><input class="es-param-input" id="lcos-dur" value="4" type="number" step="0.5"><span class="es-param-unit">小时</span></div>
+                <div class="es-param-row"><span class="es-param-label">系统寿命 T</span><input class="es-param-input" id="lcos-life" value="10" type="number" step="1"><span class="es-param-unit">年</span></div>
+                <div class="es-param-row"><span class="es-param-label">年循环次数 N</span><input class="es-param-input" id="lcos-cycles" value="300" type="number" step="10"><span class="es-param-unit">次/年</span></div>
+                <div class="es-param-row"><span class="es-param-label">折现率 R</span><input class="es-param-input" id="lcos-rate" value="0.08" type="number" step="0.01"><span class="es-param-unit">(0.08=8%)</span></div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">💰 成本参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">容量成本 C_E</span><input class="es-param-input" id="lcos-ce" value="1400" type="number" step="10"><span class="es-param-unit">元/kWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">功率成本 C_P</span><input class="es-param-input" id="lcos-cp" value="600" type="number" step="10"><span class="es-param-unit">元/kW</span></div>
+                <div class="es-param-row"><span class="es-param-label">买电价格 P_c</span><input class="es-param-input" id="lcos-pc" value="0.35" type="number" step="0.01"><span class="es-param-unit">元/kWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">AC-AC效率 η_RTE</span><input class="es-param-input" id="lcos-rte" value="0.88" type="number" step="0.01"><span class="es-param-unit">(0.88=88%)</span></div>
+                <div class="es-param-row"><span class="es-param-label">放电效率 η_D</span><input class="es-param-input" id="lcos-etad" value="0.92" type="number" step="0.01"><span class="es-param-unit">(0.92=92%)</span></div>
+                <div class="es-param-row"><span class="es-param-label">运维费用 O&amp;M<span class="es-param-note">(自动计算)</span></span><input class="es-param-input" id="lcos-om" value="0" type="number" step="0.01" readonly style="background:#f5f5f5;color:#999"><span class="es-param-unit">元/kWh/年</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+        <button class="btn-primary" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="calcLCOS()">🔍 计算 LCOS</button>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#78909c,#90a4ae);margin-left:8px" onclick="resetLCOS()">🔄 重置</button>
+    </div>
+
+    <div class="es-result-card">
+        <div style="font-size:13px;color:#999;">全寿命度电成本</div>
+        <div><span class="es-result-value" id="lcos-result">--</span><span class="es-result-unit">元/度</span></div>
+        <div class="es-result-sub">储能系统全生命周期每放电1度电的综合成本</div>
+    </div>
+
+    <div class="result-grid" style="margin-bottom:16px;">
+        <div class="result-card"><div class="rc-label">装机容量</div><div class="rc-value" id="lcos-capacity">40</div><div class="rc-detail">MWh</div></div>
+        <div class="result-card"><div class="rc-label">初始投资</div><div class="rc-value" id="lcos-invest">6200</div><div class="rc-detail">万元</div></div>
+        <div class="result-card"><div class="rc-label">年运维费用</div><div class="rc-value" id="lcos-om-year">124</div><div class="rc-detail">万元/年</div></div>
+        <div class="result-card"><div class="rc-label">年放电量</div><div class="rc-value" id="lcos-eout">11040</div><div class="rc-detail">MWh/年</div></div>
+    </div>
+
+    <!-- LCOS 图表 -->
+    <div class="chart-section">
+        <div class="chart-section-title">📊 LCOS 成本构成分析</div>
+        <div class="chart-grid">
+            <div class="chart-container"><canvas id="lcos-cost-chart"></canvas><div class="chart-label">全寿命成本构成（折现值）</div></div>
+            <div class="chart-container"><canvas id="lcos-yearly-chart"></canvas><div class="chart-label">年度现金流分析（万元）</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ===== ROI 面板 ===== -->
+<div class="es-panel" id="es-roi">
+<div class="tool-body">
+    <div class="param-section" style="margin-bottom:16px">
+        <div class="param-section-title">⚡ 快速预设方案</div>
+        <div class="param-section-body">
+            <div class="es-preset-grid" id="roi-presets">
+                <div class="es-preset-btn active" data-preset="zj">🏭 浙江工商业</div>
+                <div class="es-preset-btn" data-preset="gd">🏗️ 广东工商业</div>
+                <div class="es-preset-btn" data-preset="custom">⚙️ 自定义</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="es-param-grid">
+        <div class="param-section">
+            <div class="param-section-title">📐 系统参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">装机功率</span><input class="es-param-input" id="roi-power" value="1" type="number" step="0.1"><span class="es-param-unit">MW</span></div>
+                <div class="es-param-row"><span class="es-param-label">装机容量</span><input class="es-param-input" id="roi-capacity" value="2" type="number" step="0.1"><span class="es-param-unit">MWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">循环效率 η</span><input class="es-param-input" id="roi-eta" value="88" type="number" step="0.5"><span class="es-param-unit">%</span></div>
+                <div class="es-param-row"><span class="es-param-label">年循环次数</span><input class="es-param-input" id="roi-cycles" value="330" type="number" step="10"><span class="es-param-unit">次/年</span></div>
+                <div class="es-param-row"><span class="es-param-label">设计寿命</span><input class="es-param-input" id="roi-life" value="10" type="number" step="1"><span class="es-param-unit">年</span></div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">💰 经济参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">单位装机成本</span><input class="es-param-input" id="roi-unitcost" value="1500" type="number" step="10"><span class="es-param-unit">元/kWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">运维成本比例</span><input class="es-param-input" id="roi-omrate" value="1.5" type="number" step="0.1"><span class="es-param-unit">%/年</span></div>
+                <div class="es-param-row"><span class="es-param-label">贷款年利率</span><input class="es-param-input" id="roi-loan" value="4.5" type="number" step="0.1"><span class="es-param-unit">%</span></div>
+                <div class="es-param-row"><span class="es-param-label">买电价格</span><input class="es-param-input" id="roi-pbuy" value="0.35" type="number" step="0.01"><span class="es-param-unit">元/kWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">卖电价格</span><input class="es-param-input" id="roi-psell" value="0.95" type="number" step="0.01"><span class="es-param-unit">元/kWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">放电深度 DoD</span><input class="es-param-input" id="roi-dod" value="90" type="number" step="5"><span class="es-param-unit">%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:20px;">
+        <button class="btn-primary" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="calcROI()">🔍 计算投资回报</button>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#78909c,#90a4ae);margin-left:8px" onclick="resetROI()">🔄 重置</button>
+    </div>
+
+    <div class="result-grid" style="margin-bottom:16px;">
+        <div class="result-card"><div class="rc-label">初始总投资</div><div class="rc-value" id="roi-invest">300</div><div class="rc-detail">万元</div></div>
+        <div class="result-card"><div class="rc-label">年收入（峰谷套利）</div><div class="rc-value" id="roi-revenue">34.88</div><div class="rc-detail">万元/年</div></div>
+        <div class="result-card"><div class="rc-label">年运维成本</div><div class="rc-value" id="roi-om">4.5</div><div class="rc-detail">万元/年</div></div>
+        <div class="result-card"><div class="rc-label">年贷款利息</div><div class="rc-value" id="roi-interest">13.5</div><div class="rc-detail">万元/年</div></div>
+        <div class="result-card"><div class="rc-label">年净收益</div><div class="rc-value" id="roi-net">16.88</div><div class="rc-detail">万元/年</div></div>
+        <div class="result-card" style="border-color:#FF9800;background:#FFF8E1"><div class="rc-label">年投资回报率</div><div class="rc-value" style="color:#E65100" id="roi-result">5.63</div><div class="rc-detail" style="color:#E65100">%</div></div>
+    </div>
+
+    <!-- ROI 图表 -->
+    <div class="chart-section">
+        <div class="chart-section-title">📊 投资回报分析</div>
+        <div class="chart-grid">
+            <div class="chart-container"><canvas id="roi-cashflow-chart"></canvas><div class="chart-label">年度现金流与累计净收益（万元）</div></div>
+            <div class="chart-container"><canvas id="roi-pie-chart"></canvas><div class="chart-label">年收益构成分析</div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ===== SaaS 模拟器面板 ===== -->
+<div class="es-panel" id="es-saas">
+<div class="tool-body">
+    <div class="es-param-grid">
+        <div class="param-section">
+            <div class="param-section-title">📐 储能产品参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">产品名</span><input class="es-param-input" id="saas-name" value="锂电池储能" type="text"><span class="es-param-unit"></span></div>
+                <div class="es-param-row"><span class="es-param-label">额定放电时长</span><input class="es-param-input" id="saas-dur" value="4" type="number" step="0.5"><span class="es-param-unit">h</span></div>
+                <div class="es-param-row"><span class="es-param-label">储能功率</span><input class="es-param-input" id="saas-power" value="2" type="number" step="0.1"><span class="es-param-unit">MW</span></div>
+                <div class="es-param-row"><span class="es-param-label">LCOS成本</span><input class="es-param-input" id="saas-lcos" value="0.45" type="number" step="0.01"><span class="es-param-unit">元/度</span></div>
+                <div class="es-param-row"><span class="es-param-label">功率最小变化幅度</span><input class="es-param-input" id="saas-step" value="0.1" type="number" step="0.01"><span class="es-param-unit">MW</span></div>
+            </div>
+        </div>
+        <div class="param-section">
+            <div class="param-section-title">📊 总量参数</div>
+            <div class="param-section-body">
+                <div class="es-param-row"><span class="es-param-label">日总发电量</span><input class="es-param-input" id="saas-gen-total" value="120" type="number" step="1"><span class="es-param-unit">MWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">日总用电量</span><input class="es-param-input" id="saas-load-total" value="100" type="number" step="1"><span class="es-param-unit">MWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">储能容量</span><input class="es-param-input" id="saas-cap" value="8" type="number" step="0.5"><span class="es-param-unit">MWh</span></div>
+                <div class="es-param-row"><span class="es-param-label">循环效率</span><input class="es-param-input" id="saas-eta" value="90" type="number" step="1"><span class="es-param-unit">%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px;">
+        <button class="btn-primary" style="background:linear-gradient(135deg,#FF9800,#FF5722)" onclick="runSaaS()">🔍 运行模拟</button>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#4CAF50,#66BB6A);margin-left:8px" onclick="autoFillTimeline()">📋 快速填充典型曲线</button>
+        <button class="btn-primary" style="background:linear-gradient(135deg,#78909c,#90a4ae);margin-left:8px" onclick="resetSaaS()">🔄 重置</button>
+    </div>
+
+    <!-- 24h 曲线图 -->
+    <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:#333;">📊 24小时发用电曲线</div>
+        <div style="margin-bottom:8px;display:flex;gap:16px;font-size:12px;">
+            <span>🟠 发电</span><span>🔵 用电</span><span>🟢 储能充放(+/-)</span>
+            <span style="margin-left:auto;color:#888;">点击柱状条可编辑</span>
+        </div>
+        <div style="display:flex;font-size:9px;color:#888;margin-left:24px;margin-bottom:2px;">
+            <span style="width:calc(100%/24);text-align:center" id="saas-hour-labels"></span>
+        </div>
+        <div style="display:flex;gap:1px;height:120px;align-items:flex-end;background:#fafafa;border-radius:4px;padding:2px;overflow:hidden" id="saas-bars"></div>
+    </div>
+
+    <!-- 24h 数据表格 -->
+    <div style="overflow-x:auto;margin-bottom:16px;">
+        <table class="ref-table" style="min-width:100%;font-size:11px">
+            <thead>
+                <tr><th>时段</th><th>发电(MW)</th><th>用电(MW)</th><th>净功率(MW)</th><th>储能动作</th></tr>
+            </thead>
+            <tbody id="saas-table-body"></tbody>
+        </table>
+    </div>
+
+    <div class="result-grid" style="margin-bottom:16px;">
+        <div class="result-card"><div class="rc-label">日充电量</div><div class="rc-value" id="saas-charge">--</div><div class="rc-detail">MWh</div></div>
+        <div class="result-card"><div class="rc-label">日放电量</div><div class="rc-value" id="saas-discharge">--</div><div class="rc-detail">MWh</div></div>
+        <div class="result-card"><div class="rc-label">弃电量</div><div class="rc-value" id="saas-curtail">--</div><div class="rc-detail">MWh</div></div>
+        <div class="result-card"><div class="rc-label">并网购电量</div><div class="rc-value" id="saas-gridbuy">--</div><div class="rc-detail">MWh</div></div>
+        <div class="result-card"><div class="rc-label">自给率</div><div class="rc-value" id="saas-selfrate">--</div><div class="rc-detail">%</div></div>
+        <div class="result-card"><div class="rc-label">储能利用率</div><div class="rc-value" id="saas-util">--</div><div class="rc-detail">%</div></div>
+    </div>
+</div>
+</div>
+
+</div><!-- /panel-storage -->
+
+</div><!-- /page-content -->
+
+<!-- 加载遮罩 -->
+<div class="loading-overlay" id="loadingOverlay"><div class="loading-box"><div class="spinner"></div>正在处理...</div></div>
+
+<script>
+// ============ 工具切换 ============
+function switchTool(name) {
+    document.querySelectorAll('.toolbox-nav a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('.toolbox-nav a[onclick*="'+name+'"]').classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+    if (name === 'capacity') { updateTotals(); }
+    if (name === 'breaker') { calcBreaker(); }
+    if (name === 'cable') { calcCable(); }
+    if (name === 'storage') { switchES('lcos'); }
+}
+
+// ============ 工具1: 断路器选型 ============
+let bkIsHV = false, bkIsManual = false, bkManualVal = 800;
+
+function switchVoltage(hv) {
+    bkIsHV = !!hv;
+    document.getElementById('lv-btn').classList.toggle('active', !hv);
+    document.getElementById('hv-btn').classList.toggle('active', hv);
+    document.querySelectorAll('.lv-only').forEach(e => e.style.display = hv ? 'none' : '');
+    document.querySelectorAll('.hv-only').forEach(e => e.style.display = hv ? '' : 'none');
+    document.getElementById('breaker-opts-lv').style.display = hv ? 'none' : '';
+    document.getElementById('breaker-opts-hv').style.display = hv ? '' : 'none';
+    document.getElementById('tool-title-bar').style.background = hv ? 'linear-gradient(135deg,#6a1b9a,#ab47bc)' : '';
+    resetBreaker();
+}
+
+function setBreakerMode(mode) {
+    bkIsManual = (mode === 'manual');
+    document.getElementById('auto-btn').classList.toggle('active', !bkIsManual);
+    document.getElementById('manual-btn').classList.toggle('active', bkIsManual);
+    document.getElementById('manual-panel').style.display = bkIsManual ? '' : 'none';
+}
+
+document.querySelectorAll('.breaker-opt').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const parent = this.parentElement;
+        parent.querySelectorAll('.breaker-opt').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        bkManualVal = parseInt(this.getAttribute('data-val'));
+    });
+});
+
+function calcBreaker() {
+    const power = parseFloat(document.getElementById('bk-power').value) || 1000;
+    const voltage = bkIsHV ? (parseFloat(document.getElementById('bk-voltage-hv').value) || 10) : (parseFloat(document.getElementById('bk-voltage-lv').value) || 0.4);
+    const pf = parseFloat(document.getElementById('bk-pf').value) || 0.95;
+    const sc = parseFloat(document.getElementById('bk-sc').value) || 25;
+    const temp = document.getElementById('bk-temp').value;
+
+    const current = power * 1000 / (Math.sqrt(3) * voltage * 1000 * pf);
+    document.getElementById('bk-current').textContent = current.toFixed(1);
+
+    let breakerCurrent;
+    if (bkIsManual) {
+        breakerCurrent = bkManualVal;
+    } else {
+        const std = bkIsHV ? [400,630,800,1000,1250,1600,2000,2500,3150,4000] : [100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000];
+        breakerCurrent = std.find(v => v > current) || 4000;
+    }
+    document.getElementById('bk-breaker').textContent = breakerCurrent;
+
+    const scReq = 1.2 * sc;
+    const caps = bkIsHV ? [16,20,25,31.5,40,50] : [25,36,42,50,65,85,100];
+    const icu = caps.find(v => v >= scReq) || (bkIsHV ? 50 : 100);
+    document.getElementById('bk-icu').textContent = icu;
+
+    const longDelay = Math.round(1.1 * current);
+    const shortDelay = Math.round(5 * longDelay);
+    const instant = bkIsHV ? 6 * breakerCurrent : 10 * breakerCurrent;
+
+    document.getElementById('bk-long').textContent = longDelay;
+    document.getElementById('bk-short').textContent = shortDelay;
+    document.getElementById('bk-instant').textContent = instant;
+
+    let model;
+    if (bkIsHV) {
+        model = breakerCurrent <= 1250 ? `VS1-${breakerCurrent}/${icu}kA` : `VD4-${breakerCurrent}/${icu}kA`;
+    } else {
+        model = breakerCurrent <= 630 ? `NM1-${breakerCurrent}/${icu}kA` : `CW2-${breakerCurrent}/${icu}kA`;
+    }
+    document.getElementById('bk-model').textContent = model;
+    document.getElementById('bk-mode-note').textContent = bkIsManual ? '手动选型模式' : '自动选型模式';
+
+    // 更新推导过程
+    updateBreakerProcess(power, voltage, pf, sc, current, breakerCurrent, icu, longDelay, shortDelay, instant);
+    // 渲染图表
+    renderBreakerChart(current, breakerCurrent, longDelay, shortDelay, instant);
+}
+
+function resetBreaker() {
+    document.getElementById('bk-power').value = bkIsHV ? 2000 : 1000;
+    document.getElementById(bkIsHV ? 'bk-voltage-hv' : 'bk-voltage-lv').value = bkIsHV ? 10 : 0.4;
+    document.getElementById('bk-pf').value = 0.95;
+    document.getElementById('bk-sc').value = 25;
+    document.getElementById('bk-temp').value = '40';
+    setBreakerMode('auto');
+    calcBreaker();
+}
+
+function exportBreakerReport() {
+    const power = document.getElementById('bk-power').value;
+    const voltage = bkIsHV ? document.getElementById('bk-voltage-hv').value : document.getElementById('bk-voltage-lv').value;
+    const pf = document.getElementById('bk-pf').value;
+    const sc = document.getElementById('bk-sc').value;
+    const temp = document.getElementById('bk-temp').value;
+    const current = document.getElementById('bk-current').textContent;
+    const breaker = document.getElementById('bk-breaker').textContent;
+    const model = document.getElementById('bk-model').textContent;
+    const icu = document.getElementById('bk-icu').textContent;
+    const lr = document.getElementById('bk-long').textContent;
+    const sr = document.getElementById('bk-short').textContent;
+    const ir = document.getElementById('bk-instant').textContent;
+    const vl = bkIsHV ? '10kV' : '0.4kV';
+
+    const html = `<html><head><meta charset="UTF-8"><style>
+        body{font-family:'Microsoft YaHei',sans-serif;margin:2cm;color:#333}
+        h1{text-align:center;color:#1565C0}
+        h2{color:#1976D2;border-bottom:2px solid #64B5F6;padding-bottom:6px;margin-top:20px}
+        table{width:100%;border-collapse:collapse;margin:12px 0}
+        th,td{border:1px solid #ddd;padding:10px;text-align:left}
+        th{background:#e3f2fd}
+        .calc{background:#f5f9ff;padding:12px;border-radius:6px;margin:10px 0;border-left:4px solid #64B5F6}
+        .formula{font-family:monospace;font-weight:700}
+    </style></head><body>
+        <h1>${vl}光伏并网断路器选型报告</h1>
+        <p style="text-align:center;color:#888">生成日期: ${new Date().toLocaleDateString()} | 标准: ${bkIsHV?'GB/T 1984-2014':'GB/T 14048.2-2020'}</p>
+        <h2>一、基本参数</h2>
+        <table><tr><th>参数</th><th>数值</th><th>单位</th></tr>
+        <tr><td>额定功率</td><td>${power}</td><td>kW</td></tr>
+        <tr><td>额定电压</td><td>${voltage}</td><td>kV</td></tr>
+        <tr><td>功率因数</td><td>${pf}</td><td>-</td></tr>
+        <tr><td>短路容量</td><td>${sc}</td><td>kA</td></tr>
+        <tr><td>环境温度</td><td>${temp}</td><td>℃</td></tr></table>
+        <h2>二、计算结果</h2>
+        <table><tr><th>项目</th><th>结果</th><th>单位</th></tr>
+        <tr><td>额定电流</td><td>${current}</td><td>A</td></tr>
+        <tr><td>断路器额定电流</td><td>${breaker}</td><td>A</td></tr>
+        <tr><td>分断能力</td><td>${icu}</td><td>kA</td></tr>
+        <tr><td>长延时保护</td><td>${lr}</td><td>A</td></tr>
+        <tr><td>短延时保护</td><td>${sr}</td><td>A / 0.2s</td></tr>
+        <tr><td>瞬时保护</td><td>${ir}</td><td>A</td></tr></table>
+        <h2>三、推荐型号</h2>
+        <p style="font-size:18px;font-weight:700;color:#c0392b">${model}</p>
+        <p style="color:#888;margin-top:30px">注意：实际选型请以厂家技术资料和现场条件为准</p>
+    </body></html>`;
+
+    const blob = new Blob([html], {type: 'application/msword'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${vl}断路器选型报告_${new Date().toISOString().slice(0,10)}.doc`;
+    a.click();
+    showNotify('报告已导出！');
+}
+
+// ============ 工具2: 电缆选型 ============
+const cableData = {
+    cu: {
+        a1: {sections:[10,16,25,35,50,70,95,120,150,185,240,300,400],amps:[68,91,122,150,185,230,275,320,370,430,510,600,720]},
+        a2: {sections:[10,16,25,35,50,70,95,120,150,185,240,300,400],amps:[75,100,135,165,205,255,305,355,410,475,565,665,800]},
+        b1: {sections:[10,16,25,35,50,70,95,120,150,185,240,300,400],amps:[57,76,101,125,151,192,232,269,300,341,400,458,530]},
+        d1: {sections:[10,16,25,35,50,70,95,120,150,185,240,300,400],amps:[78,100,128,157,185,228,270,308,346,390,445,505,580]}
+    },
+    al: {
+        a1: {sections:[16,25,35,50,70,95,120,150,185,240,300,400],amps:[54,73,90,116,143,177,204,238,273,322,370,440]},
+        a2: {sections:[16,25,35,50,70,95,120,150,185,240,300,400],amps:[59,80,100,129,159,196,226,264,303,357,410,488]},
+        b1: {sections:[16,25,35,50,70,95,120,150,185,240,300,400],amps:[45,61,75,105,123,160,190,220,248,290,330,380]},
+        d1: {sections:[16,25,35,50,70,95,120,150,185,240,300,400],amps:[62,78,100,122,148,178,210,242,270,310,348,408]}
+    }
+};
+
+function calcCable() {
+    const power = parseFloat(document.getElementById('cb-power').value) || 1000;
+    const voltage = parseFloat(document.getElementById('cb-voltage').value) || 0.4;
+    const pf = parseFloat(document.getElementById('cb-pf').value) || 1;
+    const length = parseFloat(document.getElementById('cb-length').value) || 100;
+    const vdropMax = parseFloat(document.getElementById('cb-vdrop').value) || 3;
+    const material = document.getElementById('cb-material').value;
+    const temp = parseInt(document.getElementById('cb-temp').value);
+    const install = document.getElementById('cb-install').value;
+    const circuits = parseInt(document.getElementById('cb-circuits').value);
+
+    // Calculate current
+    const isAC = voltage < 1;
+    const current = isAC ? power * 1000 / (Math.sqrt(3) * voltage * 1000 * pf) : power * 1000 / (voltage * 1000);
+    document.getElementById('cb-current').textContent = current.toFixed(1);
+
+    // Temperature correction
+    const tempFactors = {25:1.10,30:1.05,35:1.00,40:0.91,45:0.82};
+    const tf = tempFactors[temp] || 0.91;
+    // Circuit grouping correction
+    const cf = [1, 0.82, 0.73, 0.65, 0.58][Math.min(circuits-1, 4)];
+
+    const correctedCurrent = current / tf / cf;
+
+    // Select section
+    const data = cableData[material][install];
+    let section = data.sections[0], ampacity = data.amps[0];
+    for (let i = 0; i < data.sections.length; i++) {
+        if (data.amps[i] >= correctedCurrent) { section = data.sections[i]; ampacity = data.amps[i]; break; }
+    }
+    if (correctedCurrent > data.amps[data.amps.length-1]) { section = data.sections[data.sections.length-1]; ampacity = data.amps[data.amps.length-1]; }
+
+    document.getElementById('cb-section').textContent = section;
+    document.getElementById('cb-ampacity').textContent = Math.round(ampacity * tf * cf);
+
+    // Voltage drop
+    const rho = material === 'cu' ? 0.0185 : 0.0294;
+    const vdrop = (current * rho * length * (isAC ? Math.sqrt(3) : 2)) / (voltage * 1000 * section) * 100;
+    document.getElementById('cb-vdrop-actual').textContent = vdrop.toFixed(2);
+
+    // Cable model
+    let modelText = '';
+    if (isAC) {
+        const vClass = voltage < 1 ? '0.6/1kV' : '8.7/15kV';
+        const core = material === 'cu' ? 'YJV' : 'YJLV';
+        modelText = `${core}-${vClass} 3×${section}`;
+    } else {
+        const core = material === 'cu' ? 'PV1-F' : 'PV-AL';
+        modelText = `${core} 1×${section}mm²`;
+    }
+    document.getElementById('cb-recommend').textContent = modelText;
+
+    const vdropWarning = vdrop > vdropMax ? `<span style="color:#e74c3c">⚠ 电压降(${vdrop.toFixed(2)}%)超过允许值(${vdropMax}%)，建议增大截面！</span>` : '✅ 满足要求';
+    document.getElementById('cb-result-box').innerHTML = `<strong>推荐：</strong><span style="color:#c0392b;font-weight:700;font-size:16px;">${modelText}</span><span style="margin-left:12px">${vdropWarning}</span>`;
+
+    // 更新推导过程
+    updateCableProcess(current, voltage, pf, length, vdropMax, tf, cf, correctedCurrent, section, vdrop);
+    // 渲染图表
+    renderCableCharts(current, section, vdrop, vdropMax);
+}
+
+function exportCableResult() {
+    const power = document.getElementById('cb-power').value;
+    const voltage = document.getElementById('cb-voltage').value;
+    const current = document.getElementById('cb-current').textContent;
+    const section = document.getElementById('cb-section').textContent;
+    const model = document.getElementById('cb-recommend').textContent;
+    const vdrop = document.getElementById('cb-vdrop-actual').textContent;
+
+    const html = `<html><head><meta charset="UTF-8"><style>
+        body{font-family:'Microsoft YaHei',sans-serif;margin:2cm}
+        h1{text-align:center;color:#1565C0}
+        table{width:100%;border-collapse:collapse;margin:12px 0}
+        th,td{border:1px solid #ddd;padding:10px}
+        th{background:#e3f2fd;text-align:left}
+    </style></head><body>
+        <h1>光伏电缆选型结果</h1>
+        <p style="text-align:center;color:#888">${new Date().toLocaleDateString()}</p>
+        <table><tr><th>参数</th><th>数值</th></tr>
+        <tr><td>额定功率</td><td>${power} kW</td></tr>
+        <tr><td>额定电压</td><td>${voltage} kV</td></tr>
+        <tr><td>计算电流</td><td>${current} A</td></tr>
+        <tr><td>推荐截面</td><td>${section} mm²</td></tr>
+        <tr><td>电压降</td><td>${vdrop}%</td></tr>
+        <tr><td>推荐型号</td><td style="font-weight:700;color:#c0392b">${model}</td></tr></table>
+    </body></html>`;
+
+    const blob = new Blob([html], {type: 'application/msword'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `电缆选型结果_${new Date().toISOString().slice(0,10)}.doc`;
+    a.click();
+    showNotify('结果已导出！');
+}
+
+// ============ 工具3: 装机容量估算 ============
+let ctHasUserData = false;
+
+function onRoofTypeChange() {
+    const isFlat = document.getElementById('ct-type').value === '平屋顶';
+    const row = document.getElementById('ct-angle-row');
+    row.style.opacity = isFlat ? '1' : '0.4';
+    row.style.pointerEvents = isFlat ? '' : 'none';
+}
+
+function addExampleData() {
+    document.getElementById('ct-list').innerHTML = '';
+    addFactoryRow('彩钢瓦厂房示例', '彩钢瓦', 0, 4600, 0.7, true);
+    addFactoryRow('平屋顶厂房示例', '平屋顶', 15, 16000, 0.85, true);
+    updateTotals();
+}
+
+function addFactory() {
+    const name = document.getElementById('ct-fname').value.trim();
+    const type = document.getElementById('ct-type').value;
+    const angle = type === '平屋顶' ? (parseFloat(document.getElementById('ct-angle').value) || 0) : 0;
+    const area = parseFloat(document.getElementById('ct-farea').value);
+    const factor = parseFloat(document.getElementById('ct-factor').value);
+    if (!name) { alert('请输入厂房名称！'); return; }
+    if (isNaN(area) || area <= 0) { alert('请输入有效面积！'); return; }
+    if (isNaN(factor) || factor <= 0 || factor > 1) { alert('利用系数需在0~1之间！'); return; }
+    if (!ctHasUserData) { document.getElementById('ct-list').innerHTML = ''; document.getElementById('ct-note').style.display = 'none'; ctHasUserData = true; }
+    addFactoryRow(name, type, angle, area, factor, false);
+    updateTotals();
+    document.getElementById('ct-fname').value = '';
+    document.getElementById('ct-farea').value = '';
+}
+
+function addFactoryRow(name, type, angle, area, factor, isExample) {
+    const mp = parseFloat(document.getElementById('ct-mp').value) || 580;
+    const ml = parseFloat(document.getElementById('ct-ml').value) || 2278;
+    const mw = parseFloat(document.getElementById('ct-mw').value) || 1134;
+    const lat = parseFloat(document.getElementById('ct-lat').value) || 22.8;
+    const kw = calcCapacity(type, angle, area, factor, mp, ml/1000, mw/1000, lat);
+
+    const tbody = document.getElementById('ct-list');
+    const row = document.createElement('tr');
+    if (isExample) row.classList.add('example-row');
+    row.innerHTML = `<td>${tbody.children.length+1}</td><td>${escHtml(name)}</td><td>${escHtml(type)}</td><td>${angle}</td><td>${area.toLocaleString()}</td><td>${factor}</td><td class="output-cell">${kw.toFixed(2)}</td><td><button class="btn-delete" onclick="deleteFactory(this)">删除</button></td>`;
+    tbody.appendChild(row);
+}
+
+function deleteFactory(btn) {
+    btn.closest('tr').remove();
+    document.querySelectorAll('#ct-list tr').forEach((r,i) => { r.cells[0].textContent = i+1; });
+    updateTotals();
+}
+
+function updateTotals() {
+    let ta = 0, tk = 0;
+    document.querySelectorAll('#ct-list tr').forEach(r => { ta += parseFloat(r.cells[4].textContent.replace(/,/g,''))||0; tk += parseFloat(r.cells[6].textContent)||0; });
+    document.getElementById('ct-total-area').textContent = ta.toLocaleString();
+    document.getElementById('ct-total-kw').textContent = tk.toFixed(2);
+}
+
+function calcCapacity(type, angle, area, factor, mp, mlM, mwM, lat) {
+    const modArea = mlM * mwM;
+    if (type === '彩钢瓦') return area * factor / modArea * (mp / 1000);
+    const sf = 2.5 + (lat - 25) * 0.05;
+    const rad = angle * Math.PI / 180;
+    const effLen = mlM * Math.cos(rad) + mlM * Math.sin(rad) * sf;
+    return area * factor / (effLen * mwM) * (mp / 1000);
+}
+
+function exportCapacityExcel() {
+    if (typeof XLSX === 'undefined') {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js';
+        s.onload = () => doExportC();
+        document.head.appendChild(s);
+    } else { doExportC(); }
+}
+
+function doExportC() {
+    const rows = [['编号','厂房名称','屋顶类别','倾角(°)','面积(㎡)','利用系数','容量(kW)']];
+    document.querySelectorAll('#ct-list tr').forEach(r => {
+        rows.push([r.cells[0].textContent,r.cells[1].textContent,r.cells[2].textContent,r.cells[3].textContent,r.cells[4].textContent,r.cells[5].textContent,r.cells[6].textContent]);
+    });
+    rows.push(['合计','','','',document.getElementById('ct-total-area').textContent,'',document.getElementById('ct-total-kw').textContent]);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, '屋顶容量估算');
+    XLSX.writeFile(wb, `屋顶容量估算_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showNotify('Excel已导出！');
+}
+
+// ============ 工具4: 发电量估算 ============
+let sunshineData = [], genSelectedCity = null;
+
+function searchCity() {
+    const q = document.getElementById('gen-search').value.trim().toLowerCase();
+    const results = document.getElementById('gen-results');
+    if (q.length < 1) { results.style.display = 'none'; return; }
+    const matches = sunshineData.filter(d => d.city.toLowerCase().includes(q) || d.province.toLowerCase().includes(q));
+    results.innerHTML = matches.slice(0, 15).map((d,i) => `<div class="search-result-item" onclick="selectCity(${sunshineData.indexOf(d)})">${d.province} - ${d.city}（年均 ${d.average.toFixed(2)} h/天）</div>`).join('');
+    results.style.display = matches.length ? 'block' : 'none';
+}
+
+function selectCity(idx) {
+    genSelectedCity = sunshineData[idx];
+    document.getElementById('gen-results').style.display = 'none';
+    document.getElementById('gen-search').value = genSelectedCity.province + ' - ' + genSelectedCity.city;
+    document.getElementById('gen-selected').style.display = '';
+    document.getElementById('gen-city-name').textContent = genSelectedCity.city;
+    document.getElementById('gen-avg').textContent = genSelectedCity.average.toFixed(2);
+
+    const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('gen-monthly').innerHTML = genSelectedCity.months.map((v,i) => `<div class="month-card"><div class="mc-m">${months[i]}</div><div class="mc-v">${v.toFixed(2)}h</div></div>`).join('');
+
+    // Update monthly results
+    const days = [31,28,31,30,31,30,31,31,30,31,30,31];
+    const cap = parseFloat(document.getElementById('gen-capacity').value) || 1000;
+    const eff = (parseFloat(document.getElementById('gen-efficiency').value) || 80) / 100;
+    const monthlyGen = genSelectedCity.months.map((v,i) => cap * v * days[i] * eff);
+    document.getElementById('gen-monthly-result').innerHTML = monthlyGen.map((v,i) => {
+        return `<div class="month-card"><div class="mc-m">${months[i]}</div><div class="mc-v" style="font-size:12px">${(v/1000).toFixed(2)}k</div></div>`;
+    }).join('');
+
+    // 渲染日照图表
+    renderGenCharts(genSelectedCity.months, monthlyGen);
+}
+
+function calcGeneration() {
+    if (!genSelectedCity) { alert('请先搜索并选择城市！'); return; }
+    const cap = parseFloat(document.getElementById('gen-capacity').value) || 1000;
+    const eff = (parseFloat(document.getElementById('gen-efficiency').value) || 80) / 100;
+    const price = parseFloat(document.getElementById('gen-price').value) || 0.4;
+    const days = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+    let totalYearly = 0;
+    const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    const monthlyGen = genSelectedCity.months.map((v,i) => {
+        const monthly = cap * v * days[i] * eff;
+        totalYearly += monthly;
+        return monthly;
+    });
+
+    document.getElementById('gen-monthly-result').innerHTML = monthlyGen.map((v,i) => {
+        return `<div class="month-card"><div class="mc-m">${months[i]}</div><div class="mc-v" style="font-size:12px">${(v/1000).toFixed(2)}k</div></div>`;
+    }).join('');
+
+    document.getElementById('gen-daily').textContent = (cap * genSelectedCity.average * eff).toFixed(0);
+    document.getElementById('gen-yearly').textContent = (totalYearly / 10000).toFixed(2);
+    document.getElementById('gen-revenue').textContent = (totalYearly * price / 10000).toFixed(2);
+    document.getElementById('gen-co2').textContent = (totalYearly * 0.785 / 1000).toFixed(2);
+
+    // 更新推导过程
+    updateGenProcess(genSelectedCity.city, genSelectedCity.average, genSelectedCity.months, cap, eff, totalYearly, price);
+    // 渲染图表
+    renderGenCharts(genSelectedCity.months, monthlyGen);
+}
+
+// ============ 公用函数 ============
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function showNotify(msg) {
+    const n = document.getElementById('notification');
+    n.textContent = msg;
+    n.style.display = 'block';
+    setTimeout(() => n.style.display = 'none', 2500);
+}
+
+// ============ 计算过程切换 ============
+function toggleProcess(id) {
+    const body = document.getElementById(id);
+    const toggle = document.getElementById(id + '-toggle');
+    const isOpen = body.classList.contains('show');
+    if (isOpen) { body.classList.remove('show'); toggle.classList.remove('expanded'); }
+    else { body.classList.add('show'); toggle.classList.add('expanded'); }
+}
+
+function toggleGuide(id) {
+    const body = document.getElementById(id);
+    const toggle = document.getElementById(id + '-toggle');
+    const isOpen = body.classList.contains('show');
+    if (isOpen) { body.classList.remove('show'); toggle.classList.remove('expanded'); }
+    else { body.classList.add('show'); toggle.classList.add('expanded'); }
+}
+
+// ============ 图表管理 ============
+const chartInstances = {};
+function destroyChart(key) { if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; } }
+
+// ============ 断路器: 更新推导过程 ============
+function updateBreakerProcess(power, voltage, pf, sc, current, breakerCurrent, icu, longDelay, shortDelay, instant) {
+    const vStr = voltage.toFixed(1);
+    document.getElementById('bk-step1-formula').textContent = `= ${power} / (1.732 × ${vStr} × ${pf})`;
+    document.getElementById('bk-step1-result').textContent = `= ${current.toFixed(1)} A`;
+    document.getElementById('bk-step1-current').textContent = current.toFixed(1);
+
+    document.getElementById('bk-step2-search').textContent = `${current.toFixed(1)} A → 下一档位 → ${breakerCurrent} A`;
+    document.getElementById('bk-step2-result').textContent = `断路器额定电流 In_b = ${breakerCurrent} A`;
+    document.getElementById('bk-step2-breaker').textContent = breakerCurrent;
+
+    document.getElementById('bk-step3-formula').textContent = `= 1.2 × ${sc} = ${(1.2*sc).toFixed(0)} kA`;
+    document.getElementById('bk-step3-result').textContent = `Icu = ${icu} kA (≥ ${(1.2*sc).toFixed(0)} kA)`;
+    document.getElementById('bk-step3-icu').textContent = icu;
+
+    document.getElementById('bk-step4a').textContent = `= 1.1 × ${current.toFixed(1)} = ${longDelay} A`;
+    document.getElementById('bk-step4b').textContent = `= 5 × ${longDelay} = ${shortDelay} A`;
+    document.getElementById('bk-step4c').textContent = `= 10 × ${breakerCurrent} = ${instant} A`;
+    document.getElementById('bk-step4-ir').textContent = longDelay;
+    document.getElementById('bk-step4-isd').textContent = shortDelay;
+    document.getElementById('bk-step4-ii').textContent = instant;
+}
+
+// ============ 断路器: 渲染图表 ============
+function renderBreakerChart(current, breakerCurrent, longDelay, shortDelay, instant) {
+    destroyChart('breaker');
+    const ctx = document.getElementById('breaker-chart').getContext('2d');
+    chartInstances.breaker = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['计算电流\nIn', '断路器额定\nIn_b', '长延时\nIr', '短延时\nIsd', '瞬时保护\nIi'],
+            datasets: [{
+                label: '电流值 (A)',
+                data: [current, breakerCurrent, longDelay, shortDelay, instant],
+                backgroundColor: [
+                    'rgba(66,165,245,0.7)',
+                    'rgba(21,101,192,0.8)',
+                    'rgba(76,175,80,0.7)',
+                    'rgba(255,152,0,0.7)',
+                    'rgba(229,57,53,0.7)'
+                ],
+                borderColor: ['#42A5F5','#1565C0','#4CAF50','#FF9800','#E53935'],
+                borderWidth: 1.5,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ctx.raw.toFixed(0) + ' A' } }
+            },
+            scales: {
+                y: { title: { display: true, text: '电流 (A)', font: { size: 12 } }, beginAtZero: false }
+            }
+        }
+    });
+}
+
+// ============ 电缆: 更新推导过程 ============
+function updateCableProcess(current, voltage, pf, length, vdropMax, tf, cf, correctedCurrent, section, vdrop) {
+    const isAC = voltage < 1;
+    const vStr = isAC ? `${voltage} kV (交流)` : `${voltage} kV (直流)`;
+    document.getElementById('cb-step1-formula').textContent = isAC ? `= ${parseFloat(document.getElementById('cb-power').value)||1000} / (1.732 × ${voltage} × ${pf})` : `= ${parseFloat(document.getElementById('cb-power').value)||1000} / ${voltage}`;
+    document.getElementById('cb-step1-result').textContent = `= ${current.toFixed(1)} A`;
+
+    document.getElementById('cb-step2-kg').textContent = cf.toFixed(2);
+    document.getElementById('cb-step2-result').textContent = `K = ${tf.toFixed(2)} × ${cf.toFixed(2)} = ${(tf*cf).toFixed(3)}`;
+
+    document.getElementById('cb-step3-formula').textContent = `= ${current.toFixed(1)} / ${(tf*cf).toFixed(3)}`;
+    document.getElementById('cb-step3-result').textContent = `= ${correctedCurrent.toFixed(1)} A`;
+
+    // Step 4 - section selection
+    const data = cableData[document.getElementById('cb-material').value][document.getElementById('cb-install').value];
+    const actualAmpacity = data.amps[data.sections.indexOf(section)] || data.amps[data.amps.length-1];
+    document.getElementById('cb-step4-search').textContent = `${correctedCurrent.toFixed(1)} A → 匹配截面 → ${section} mm²（基准载流量 ${actualAmpacity} A）`;
+    const suitable = actualAmpacity >= correctedCurrent;
+    if (!suitable) {
+        document.getElementById('cb-step4-search').textContent += ' ⚠ 单根电缆无法满足，建议采用多根并联或增大电压等级';
+    }
+
+    document.getElementById('cb-step5-formula').textContent = `= ${current.toFixed(1)} × 0.0185 × ${length} × ${isAC?'1.732':'2'} / (${voltage*1000} × ${section}) × 100`;
+    document.getElementById('cb-step5-result').textContent = `= ${vdrop.toFixed(2)}%`;
+    const okEl = document.getElementById('cb-step5-ok');
+    if (vdrop <= vdropMax) {
+        okEl.innerHTML = `✅ 电压降 ${vdrop.toFixed(2)}% ≤ 允许值 ${vdropMax}%，满足要求`;
+        okEl.style.color = '#2e7d32';
+    } else {
+        okEl.innerHTML = `⚠️ 电压降 ${vdrop.toFixed(2)}% > 允许值 ${vdropMax}%，建议增大截面！`;
+        okEl.style.color = '#e65100';
+    }
+}
+
+// ============ 电缆: 渲染图表 ============
+function renderCableCharts(current, section, vdrop, vdropMax) {
+    destroyChart('cable-ampacity');
+    destroyChart('cable-vdrop');
+
+    const cuA1 = {sections:[10,16,25,35,50,70,95,120,150,185,240,300,400],amps:[68,91,122,150,185,230,275,320,370,430,510,600,720]};
+
+    // Ampacity chart
+    const ctx1 = document.getElementById('cable-ampacity-chart').getContext('2d');
+    chartInstances['cable-ampacity'] = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: cuA1.sections.map(s => s+'mm²'),
+            datasets: [{
+                label: '载流量 (A)',
+                data: cuA1.amps,
+                borderColor: '#1565C0',
+                backgroundColor: 'rgba(21,101,192,0.08)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#1565C0'
+            }, {
+                label: '计算电流',
+                data: Array(cuA1.sections.length).fill(current),
+                borderColor: '#E53935',
+                borderDash: [6,3],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: {
+                y: { title: { display: true, text: '电流 (A)', font: { size: 11 } } },
+                x: { title: { display: true, text: '电缆截面', font: { size: 11 } } }
+            }
+        }
+    });
+
+    // Voltage drop chart
+    const rho = 0.0185; // copper
+    const length = parseFloat(document.getElementById('cb-length').value) || 100;
+    const voltage = parseFloat(document.getElementById('cb-voltage').value) || 0.4;
+    const isAC = voltage < 1;
+    const vdrops = cuA1.sections.map(s => (current * rho * length * (isAC?1.732:2)) / (voltage*1000 * s) * 100);
+
+    const ctx2 = document.getElementById('cable-vdrop-chart').getContext('2d');
+    chartInstances['cable-vdrop'] = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: cuA1.sections.map(s => s+'mm²'),
+            datasets: [{
+                label: '电压降 (%)',
+                data: vdrops,
+                backgroundColor: vdrops.map(v => v <= vdropMax ? 'rgba(76,175,80,0.7)' : 'rgba(229,57,53,0.7)'),
+                borderColor: vdrops.map(v => v <= vdropMax ? '#4CAF50' : '#E53935'),
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                annotation: vdropMax ? { annotations: { line1: { type: 'line', yMin: vdropMax, yMax: vdropMax, borderColor: '#E53935', borderWidth: 2, borderDash: [5,3], label: { content: '允许上限 '+vdropMax+'%', enabled: true } } } } : {}
+            },
+            scales: {
+                y: { title: { display: true, text: '电压降 (%)', font: { size: 11 } }, beginAtZero: true },
+                x: { title: { display: true, text: '电缆截面', font: { size: 11 } } }
+            }
+        }
+    });
+}
+
+// ============ 发电量: 更新推导过程 ============
+function updateGenProcess(city, avg, months, capacity, efficiency, totalYearly, price) {
+    document.getElementById('gen-step1-city').textContent = `城市: ${city} | 年均: ${avg.toFixed(2)} h/天`;
+    document.getElementById('gen-step2-example').textContent = `示例(1月): ${capacity} × ${months[0].toFixed(2)} × 31 × ${(efficiency).toFixed(2)} = ${(capacity*months[0]*31*efficiency).toFixed(0)} kWh`;
+    document.getElementById('gen-tag-yearly').textContent = (totalYearly/10000).toFixed(2);
+    document.getElementById('gen-tag-revenue').textContent = (totalYearly*price/10000).toFixed(2);
+    document.getElementById('gen-tag-co2').textContent = (totalYearly*0.785/1000).toFixed(2);
+}
+
+// ============ 发电量: 渲染图表 ============
+function renderGenCharts(months, monthlyGen) {
+    destroyChart('gen-sunshine');
+    destroyChart('gen-monthly');
+
+    const labels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+    // Sunshine chart
+    const ctx1 = document.getElementById('gen-sunshine-chart').getContext('2d');
+    chartInstances['gen-sunshine'] = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '日均峰值日照 (h/天)',
+                data: months,
+                borderColor: '#FF9800',
+                backgroundColor: 'rgba(255,152,0,0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: '#FF9800',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointHoverRadius: 7
+            }, {
+                label: '年均日照',
+                data: Array(12).fill(months.reduce((a,b)=>a+b,0)/12),
+                borderColor: '#1565C0',
+                borderDash: [6,3],
+                borderWidth: 1.5,
+                pointRadius: 0,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: {
+                y: { title: { display: true, text: '日照小时 (h/天)', font: { size: 11 } }, min: 0 }
+            }
+        }
+    });
+
+    // Generation chart
+    const ctx2 = document.getElementById('gen-monthly-chart').getContext('2d');
+    chartInstances['gen-monthly'] = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '月度发电量 (kWh)',
+                data: monthlyGen,
+                backgroundColor: monthlyGen.map((v,i) => {
+                    const max = Math.max(...monthlyGen);
+                    const ratio = v / max;
+                    return `rgba(21,101,192,${0.3+ratio*0.7})`;
+                }),
+                borderColor: '#1565C0',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => (ctx.raw).toFixed(0) + ' kWh' } } },
+            scales: {
+                y: { title: { display: true, text: '发电量 (kWh)', font: { size: 11 } }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+// ============ 日照数据库 ============
+// [Embedded sunshine data from NASA - key cities]
+sunshineData = [
+{province:"北京",city:"北京市",months:[2.79,3.69,4.71,5.75,6.17,5.72,5.13,4.67,4.26,3.67,2.82,4.16],average:4.46},
+{province:"天津",city:"天津市",months:[2.81,3.71,4.75,5.78,6.26,5.76,5.12,4.76,4.43,3.72,2.82,2.47],average:4.37},
+{province:"上海",city:"上海市",months:[2.63,3.09,3.53,4.28,4.84,4.58,5.17,4.78,4.07,3.36,2.79,2.58],average:3.81},
+{province:"重庆",city:"重庆市",months:[1.87,2.21,3.04,3.64,3.97,3.85,4.58,4.44,3.15,2.27,1.93,1.74],average:3.06},
+{province:"广东",city:"广州市",months:[2.94,2.93,2.97,3.65,4.38,4.85,5.46,4.92,4.33,4.04,3.48,3.12],average:3.92},
+{province:"广东",city:"深圳市",months:[3.15,3.08,3.22,3.95,4.67,5.12,5.75,5.18,4.58,4.26,3.72,3.35],average:4.17},
+{province:"广东",city:"珠海市",months:[3.09,3.02,3.15,3.88,4.60,5.04,5.68,5.12,4.51,4.20,3.66,3.29],average:4.10},
+{province:"广东",city:"东莞市",months:[3.07,3.00,3.12,3.85,4.57,5.00,5.63,5.07,4.47,4.16,3.63,3.26],average:4.07},
+{province:"广东",city:"佛山市",months:[2.98,2.91,3.03,3.76,4.48,4.91,5.54,4.98,4.38,4.07,3.54,3.17],average:3.98},
+{province:"广东",city:"惠州市",months:[3.05,2.98,3.10,3.83,4.55,4.98,5.61,5.05,4.45,4.14,3.61,3.24],average:4.05},
+{province:"广东",city:"中山市",months:[3.11,3.04,3.16,3.89,4.61,5.04,5.67,5.11,4.51,4.20,3.67,3.30],average:4.11},
+{province:"广东",city:"江门市",months:[3.03,2.96,3.08,3.81,4.53,4.96,5.59,5.03,4.43,4.12,3.59,3.22],average:4.03},
+{province:"广东",city:"湛江市",months:[2.98,3.15,3.45,4.45,5.21,5.35,5.62,5.12,4.56,4.12,3.48,3.05],average:4.21},
+{province:"广东",city:"肇庆市",months:[2.92,2.85,2.97,3.70,4.42,4.85,5.48,4.92,4.32,4.01,3.48,3.11],average:3.92},
+{province:"广东",city:"汕头市",months:[3.12,3.05,3.17,3.90,4.62,5.05,5.68,5.12,4.52,4.21,3.68,3.31],average:4.12},
+{province:"广东",city:"揭阳市",months:[3.08,3.01,3.13,3.86,4.58,5.01,5.64,5.08,4.48,4.17,3.64,3.27],average:4.08},
+{province:"浙江",city:"杭州市",months:[2.63,2.91,3.25,4.08,4.58,4.37,5.15,4.76,4.00,3.37,2.87,2.62],average:3.72},
+{province:"浙江",city:"宁波市",months:[2.76,3.04,3.38,4.21,4.71,4.50,5.28,4.89,4.13,3.50,3.00,2.75],average:3.85},
+{province:"浙江",city:"温州市",months:[2.72,2.99,3.33,4.16,4.66,4.45,5.23,4.84,4.08,3.45,2.95,2.70],average:3.80},
+{province:"浙江",city:"嘉兴市",months:[2.70,2.98,3.32,4.15,4.65,4.44,5.22,4.83,4.07,3.44,2.94,2.69],average:3.79},
+{province:"江苏",city:"南京市",months:[2.82,3.32,3.67,4.45,4.98,4.84,4.88,4.59,4.01,3.34,2.99,2.68],average:3.88},
+{province:"江苏",city:"苏州市",months:[2.69,3.14,3.33,4.25,4.78,4.58,5.05,4.71,3.99,3.40,2.81,2.68],average:3.78},
+{province:"江苏",city:"无锡市",months:[2.69,3.14,3.33,4.25,4.78,4.58,5.05,4.71,3.99,3.40,2.81,2.68],average:3.78},
+{province:"江苏",city:"常州市",months:[2.74,3.12,3.32,4.15,4.72,4.59,5.01,4.67,3.96,3.40,2.85,2.69],average:3.77},
+{province:"江苏",city:"南通市",months:[2.82,3.36,3.65,4.55,5.11,4.78,4.98,4.76,4.07,3.42,2.94,2.73],average:3.93},
+{province:"江苏",city:"徐州市",months:[2.93,3.57,4.22,5.07,5.45,5.44,4.91,4.63,4.19,3.42,2.93,2.63],average:4.12},
+{province:"江苏",city:"盐城市",months:[2.89,3.59,3.96,4.88,5.36,4.99,4.76,4.67,4.09,3.41,2.97,2.69],average:4.02},
+{province:"四川",city:"成都市",months:[2.27,2.65,3.55,4.23,4.50,4.33,4.72,4.55,3.24,2.55,2.25,2.13],average:3.41},
+{province:"四川",city:"绵阳市",months:[2.21,2.58,3.48,4.16,4.43,4.26,4.65,4.48,3.17,2.48,2.18,2.06],average:3.35},
+{province:"四川",city:"攀枝花市",months:[3.15,3.85,4.65,5.12,5.35,5.18,5.28,5.12,4.23,3.52,3.15,3.02],average:4.30},
+{province:"四川",city:"凉山州",months:[3.08,3.78,4.58,5.05,5.28,5.11,5.21,5.05,4.16,3.45,3.08,2.95],average:4.23},
+{province:"湖北",city:"武汉市",months:[2.57,2.76,3.24,4.05,4.48,4.63,4.92,4.73,4.05,3.15,2.89,2.52],average:3.67},
+{province:"湖北",city:"宜昌市",months:[2.31,2.52,3.00,3.72,4.01,4.30,4.51,4.34,3.66,2.92,2.57,2.31],average:3.35},
+{province:"湖北",city:"襄阳市",months:[2.75,3.23,3.72,4.48,4.71,4.94,4.67,4.37,3.77,3.08,2.72,2.49],average:3.74},
+{province:"湖南",city:"长沙市",months:[2.12,2.24,2.58,3.32,3.95,4.11,4.88,4.46,3.77,3.01,2.67,2.35],average:3.29},
+{province:"湖南",city:"株洲市",months:[2.00,2.00,2.35,3.18,3.87,4.30,5.37,4.62,3.86,3.10,2.85,2.49],average:3.33},
+{province:"湖南",city:"湘潭市",months:[2.04,2.02,2.46,3.25,3.84,4.08,5.13,4.55,3.86,3.04,2.80,2.47],average:3.30},
+{province:"山东",city:"济南市",months:[2.77,3.46,4.33,5.29,5.69,5.53,4.95,4.61,4.04,3.35,2.87,2.50],average:4.12},
+{province:"山东",city:"青岛市",months:[2.75,3.44,4.31,5.27,5.67,5.51,4.93,4.59,4.02,3.33,2.85,2.48],average:4.10},
+{province:"山东",city:"烟台市",months:[2.72,3.41,4.28,5.24,5.64,5.48,4.90,4.56,3.99,3.30,2.82,2.45],average:4.07},
+{province:"山东",city:"威海市",months:[2.68,3.37,4.24,5.20,5.60,5.44,4.86,4.52,3.95,3.26,2.78,2.41],average:4.03},
+{province:"山东",city:"潍坊市",months:[2.80,3.49,4.36,5.32,5.72,5.56,4.98,4.64,4.07,3.38,2.90,2.53],average:4.15},
+{province:"河南",city:"郑州市",months:[2.88,3.43,4.20,5.09,5.38,5.38,4.80,4.48,3.81,3.29,2.85,2.61],average:4.02},
+{province:"河南",city:"洛阳市",months:[2.88,3.42,4.09,4.93,5.32,5.25,4.76,4.32,3.69,3.25,2.83,2.60],average:3.95},
+{province:"河南",city:"开封市",months:[2.89,3.41,4.29,5.18,5.44,5.46,4.91,4.59,3.96,3.33,2.84,2.56],average:4.07},
+{province:"河北",city:"石家庄市",months:[2.92,3.75,4.69,5.73,5.86,5.74,4.94,4.49,4.07,3.75,2.95,2.57],average:4.29},
+{province:"河北",city:"唐山市",months:[2.81,3.73,4.79,5.81,6.12,5.70,5.08,4.76,4.57,3.73,2.80,2.44],average:4.36},
+{province:"河北",city:"保定市",months:[2.84,3.71,4.71,5.75,6.01,5.78,5.12,4.68,4.17,3.72,2.89,2.50],average:4.32},
+{province:"河北",city:"张家口市",months:[2.73,3.66,4.80,5.96,6.34,6.31,5.69,5.16,4.68,3.79,2.84,2.37],average:4.53},
+{province:"河北",city:"廊坊市",months:[2.79,3.69,4.71,5.75,6.17,5.72,5.13,4.67,4.26,3.67,2.82,2.47],average:4.32},
+{province:"山西",city:"太原市",months:[2.80,3.54,4.48,5.22,5.76,5.56,5.18,4.72,4.08,3.48,2.87,2.52],average:4.18},
+{province:"山西",city:"大同市",months:[2.79,3.63,4.81,5.98,6.49,6.18,5.55,5.08,4.56,3.74,2.79,2.35],average:4.50},
+{province:"山西",city:"运城市",months:[2.85,3.58,4.42,5.28,5.68,5.58,5.08,4.65,4.03,3.45,2.88,2.54],average:4.17},
+{province:"陕西",city:"西安市",months:[2.79,3.35,3.83,4.68,5.02,5.18,5.08,4.52,3.75,3.08,2.80,2.55],average:3.89},
+{province:"陕西",city:"榆林市",months:[2.82,3.56,4.68,5.82,6.25,6.08,5.48,5.02,4.32,3.58,2.82,2.42],average:4.40},
+{province:"甘肃",city:"兰州市",months:[2.61,3.45,4.32,5.28,5.72,5.58,5.22,4.78,4.02,3.32,2.72,2.38],average:4.12},
+{province:"甘肃",city:"酒泉市",months:[2.88,3.72,4.85,5.92,6.58,6.42,5.92,5.48,4.72,3.82,2.95,2.55],average:4.65},
+{province:"甘肃",city:"敦煌市",months:[2.95,3.82,5.02,6.15,6.78,6.62,6.08,5.65,4.88,3.95,3.02,2.62],average:4.80},
+{province:"青海",city:"西宁市",months:[2.72,3.55,4.55,5.42,5.95,5.82,5.42,5.02,4.28,3.55,2.88,2.52],average:4.31},
+{province:"青海",city:"格尔木市",months:[3.08,3.92,5.08,6.08,6.65,6.52,6.08,5.62,4.88,4.02,3.22,2.82],average:4.83},
+{province:"宁夏",city:"银川市",months:[2.75,3.48,4.52,5.48,6.02,5.88,5.42,4.98,4.28,3.48,2.82,2.42],average:4.29},
+{province:"新疆",city:"乌鲁木齐市",months:[2.28,3.15,4.12,5.08,5.82,5.88,5.58,5.12,4.18,3.12,2.25,1.95],average:4.04},
+{province:"新疆",city:"哈密市",months:[3.02,3.85,4.95,5.95,6.52,6.45,6.02,5.58,4.82,3.88,3.12,2.72],average:4.74},
+{province:"新疆",city:"吐鲁番市",months:[3.15,3.98,5.08,6.08,6.65,6.58,6.15,5.72,4.95,3.98,3.22,2.82],average:4.86},
+{province:"西藏",city:"拉萨市",months:[3.42,4.15,5.08,5.82,6.58,6.85,6.32,5.88,5.12,4.52,3.82,3.42],average:5.08},
+{province:"西藏",city:"日喀则市",months:[3.38,4.08,5.02,5.75,6.52,6.78,6.25,5.82,5.05,4.45,3.75,3.35],average:5.02},
+{province:"云南",city:"昆明市",months:[3.12,3.75,4.58,4.95,4.82,3.95,3.62,3.75,3.52,3.12,2.95,2.88],average:3.75},
+{province:"云南",city:"丽江市",months:[3.68,4.15,4.75,4.92,4.55,3.72,3.35,3.42,3.28,3.42,3.58,3.52],average:3.86},
+{province:"云南",city:"大理州",months:[3.55,4.05,4.68,4.85,4.48,3.65,3.28,3.35,3.22,3.35,3.48,3.42],average:3.78},
+{province:"贵州",city:"贵阳市",months:[2.15,2.48,3.22,3.68,3.82,3.55,4.08,3.95,3.12,2.48,2.28,2.08],average:3.07},
+{province:"贵州",city:"遵义市",months:[2.08,2.42,3.15,3.62,3.75,3.48,4.02,3.88,3.05,2.42,2.22,2.02],average:3.01},
+{province:"广西",city:"南宁市",months:[2.52,2.55,2.82,3.62,4.38,4.68,5.22,4.82,4.32,3.72,3.18,2.82],average:3.72},
+{province:"广西",city:"桂林市",months:[2.42,2.45,2.72,3.52,4.28,4.58,5.12,4.72,4.22,3.62,3.08,2.72],average:3.62},
+{province:"广西",city:"柳州市",months:[2.48,2.52,2.78,3.58,4.32,4.62,5.18,4.78,4.28,3.68,3.12,2.78],average:3.68},
+{province:"广西",city:"北海市",months:[2.82,2.95,3.32,4.12,4.88,5.08,5.52,5.08,4.58,4.02,3.48,3.08],average:4.08},
+{province:"福建",city:"福州市",months:[2.46,2.52,2.75,3.60,3.90,4.33,5.47,4.73,3.78,3.43,2.80,2.70],average:3.54},
+{province:"福建",city:"厦门市",months:[3.11,3.09,3.34,3.92,4.21,4.63,5.58,5.16,4.47,4.12,3.42,3.16],average:4.02},
+{province:"福建",city:"泉州市",months:[3.11,3.09,3.34,3.92,4.21,4.63,5.58,5.16,4.47,4.12,3.42,3.16],average:4.02},
+{province:"福建",city:"莆田市",months:[2.85,3.09,3.56,4.29,4.70,5.46,6.46,5.94,4.92,4.05,3.18,2.89],average:4.28},
+{province:"海南",city:"海口市",months:[3.21,3.45,4.11,4.95,5.32,5.42,5.54,4.99,4.62,4.34,3.84,3.31],average:4.43},
+{province:"海南",city:"三亚市",months:[3.85,4.11,4.63,5.29,5.36,5.12,5.07,4.76,4.50,4.23,4.00,3.61],average:4.54},
+{province:"海南",city:"三沙市",months:[4.68,5.54,6.29,6.92,6.62,6.28,6.17,5.82,5.42,4.87,4.30,3.91],average:5.57},
+{province:"辽宁",city:"沈阳市",months:[2.52,3.58,4.63,5.54,5.96,5.68,4.76,4.79,4.51,3.51,2.50,2.13],average:4.18},
+{province:"辽宁",city:"大连市",months:[2.72,3.73,4.88,5.90,6.43,6.23,5.56,5.54,4.96,3.80,2.70,2.31],average:4.56},
+{province:"辽宁",city:"鞍山市",months:[2.52,3.58,4.63,5.54,5.96,5.68,4.76,4.79,4.51,3.51,2.50,2.13],average:4.18},
+{province:"吉林",city:"长春市",months:[2.29,3.33,4.46,5.37,5.89,5.64,4.93,4.76,4.41,3.33,2.33,1.91],average:4.05},
+{province:"吉林",city:"吉林市",months:[2.27,3.29,4.28,5.13,5.77,5.69,4.84,4.68,4.30,3.24,2.25,1.89],average:3.97},
+{province:"黑龙江",city:"哈尔滨市",months:[2.11,3.18,4.34,5.16,5.85,5.92,5.04,4.80,4.21,3.06,2.14,1.73],average:3.96},
+{province:"黑龙江",city:"大庆市",months:[2.04,3.10,4.34,5.28,6.16,6.17,5.36,4.99,4.28,3.12,2.11,1.67],average:4.05},
+{province:"内蒙古",city:"呼和浩特市",months:[2.62,3.48,4.55,5.48,6.12,5.95,5.35,4.88,4.28,3.48,2.75,2.35],average:4.27},
+{province:"内蒙古",city:"包头市",months:[2.58,3.42,4.52,5.42,6.08,5.92,5.32,4.85,4.22,3.42,2.72,2.32],average:4.23},
+{province:"内蒙古",city:"鄂尔多斯市",months:[2.68,3.52,4.62,5.52,6.18,6.02,5.42,4.95,4.32,3.52,2.82,2.42],average:4.33},
+{province:"内蒙古",city:"赤峰市",months:[2.42,3.32,4.45,5.35,6.02,5.85,5.22,4.75,4.15,3.35,2.62,2.22],average:4.14},
+{province:"安徽",city:"合肥市",months:[2.68,2.98,3.48,4.05,4.62,4.55,4.86,4.55,3.91,3.22,2.91,2.57],average:3.70},
+{province:"安徽",city:"芜湖市",months:[2.71,3.07,3.44,3.96,4.63,4.58,5.05,4.67,3.97,3.31,2.91,2.63],average:3.74},
+{province:"安徽",city:"蚌埠市",months:[2.80,3.24,3.67,4.51,4.98,4.94,4.93,4.63,4.04,3.32,2.98,2.63],average:3.89},
+{province:"江西",city:"南昌市",months:[2.29,2.34,2.52,3.28,3.97,4.18,5.07,4.66,4.01,3.33,2.94,2.66],average:3.44},
+{province:"江西",city:"九江市",months:[2.38,2.66,2.88,3.54,4.13,4.23,4.92,4.51,3.94,3.19,2.89,2.60],average:3.49},
+{province:"江西",city:"赣州市",months:[2.23,2.18,2.47,3.22,3.84,4.12,5.00,4.54,3.91,3.15,2.86,2.54],average:3.34},
+{province:"香港",city:"香港",months:[3.05,3.02,3.15,3.88,4.60,5.04,5.68,5.12,4.51,4.20,3.66,3.29],average:4.10},
+{province:"澳门",city:"澳门",months:[3.12,3.08,3.22,3.95,4.67,5.12,5.75,5.18,4.58,4.26,3.72,3.35],average:4.17},
+{province:"台湾",city:"台北市",months:[2.55,2.62,2.85,3.72,4.02,4.48,5.52,4.88,3.92,3.55,2.92,2.82],average:3.65},
+{province:"台湾",city:"高雄市",months:[3.15,3.18,3.42,4.08,4.48,4.85,5.62,5.12,4.52,4.12,3.55,3.28],average:4.11}
+];
+
+// ============ 工具5: 储能计算器 ============
+
+// --- 储能子工具切换 ---
+function switchES(name) {
+    document.querySelectorAll('.es-subtab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.es-panel').forEach(p => p.classList.remove('active'));
+    const tabs = document.querySelectorAll('.es-subtab');
+    if (name === 'lcos') tabs[0].classList.add('active');
+    else if (name === 'roi') tabs[1].classList.add('active');
+    else if (name === 'saas') tabs[2].classList.add('active');
+    document.getElementById('es-' + name).classList.add('active');
+    if (name === 'lcos') calcLCOS();
+    else if (name === 'roi') calcROI();
+    else if (name === 'saas') runSaaS();
+}
+
+// --- LCOS 预设值 ---
+const lcosPresets = {
+    li:    { power:10, dur:4, life:10, cycles:300, rate:0.08, ce:1400, cp:600, pc:0.35, rte:0.88, etad:0.92 },
+    vrb:   { power:10, dur:4, life:25, cycles:300, rate:0.08, ce:3000, cp:900, pc:0.35, rte:0.75, etad:0.80 },
+    nfb:   { power:10, dur:6, life:20, cycles:300, rate:0.08, ce:2400, cp:700, pc:0.35, rte:0.72, etad:0.78 },
+    caes:  { power:10, dur:6, life:30, cycles:330, rate:0.08, ce:900, cp:350, pc:0.20, rte:0.65, etad:0.72 }
+};
+const lcosFields = ['power','dur','life','cycles','rate','ce','cp','pc','rte','etad'];
+
+function setLCOSPreset(key) {
+    document.querySelectorAll('#lcos-presets .es-preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#lcos-presets [data-preset="'+key+'"]').classList.add('active');
+    if (key === 'custom') { calcLCOS(); return; }
+    const p = lcosPresets[key];
+    if (!p) return;
+    lcosFields.forEach(f => { document.getElementById('lcos-'+f).value = p[f]; });
+    document.getElementById('lcos-om').value = (p.ce/p.etad + p.cp/p.dur).toFixed(2);
+    calcLCOS();
+}
+
+// --- LCOS preset button handlers ---
+document.addEventListener('DOMContentLoaded', function() {
+    const setupPresets = (containerId, handler) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.querySelectorAll('.es-preset-btn').forEach(btn => {
+            btn.addEventListener('click', function() { handler(this.dataset.preset); });
+        });
+    };
+    setupPresets('lcos-presets', setLCOSPreset);
+    setupPresets('roi-presets', setROIPreset);
+});
+
+// --- LCOS 计算 ---
+function calcLCOS() {
+    const P = parseFloat(document.getElementById('lcos-power').value) || 10;
+    const D = parseFloat(document.getElementById('lcos-dur').value) || 4;
+    const T = parseFloat(document.getElementById('lcos-life').value) || 10;
+    const N = parseFloat(document.getElementById('lcos-cycles').value) || 300;
+    const R = parseFloat(document.getElementById('lcos-rate').value) || 0.08;
+    const CE = parseFloat(document.getElementById('lcos-ce').value) || 1400;
+    const CP = parseFloat(document.getElementById('lcos-cp').value) || 600;
+    const PC = parseFloat(document.getElementById('lcos-pc').value) || 0.35;
+    const etaRTE = parseFloat(document.getElementById('lcos-rte').value) || 0.88;
+    const etaD = parseFloat(document.getElementById('lcos-etad').value) || 0.92;
+
+    const capacity = P * D; // MWh
+    const investMW = CP * P * 1000; // 万元 (CP 元/kW, P MW = P*1000 kW)
+    const investMWh = CE * capacity * 1000; // 万元 (CE 元/kWh, capacity MWh = capacity*1000 kWh)
+    const investTotal = investMW + investMWh; // 元
+
+    // O&M 成本因子 (元/kWh·年) — 用于参考显示
+    const omFactor = (CE / etaD + CP / D);
+    document.getElementById('lcos-om').value = omFactor.toFixed(2);
+    // O&M = 2% of initial investment (行业标准运维费率)
+    const omRate = 0.02;
+    const omAnnual = investTotal * omRate / 10000; // 万元/年
+
+    const eOutAnnual = P * D * N * etaD * 1000; // kWh/年
+    const eOutAnnualMWh = eOutAnnual / 1000;
+
+    let totalCostPV = investTotal / 10000; // 万元
+    let totalEoutPV = 0;
+    for (let t = 1; t <= T; t++) {
+        const disc = Math.pow(1 + R, t);
+        totalCostPV += omAnnual / disc;
+        totalEoutPV += eOutAnnualMWh / disc;
+    }
+
+    const lcos = totalEoutPV > 0 ? totalCostPV / totalEoutPV : 0;
+
+    document.getElementById('lcos-result').textContent = lcos.toFixed(2);
+    document.getElementById('lcos-capacity').textContent = capacity.toFixed(0);
+    document.getElementById('lcos-invest').textContent = (investTotal/10000).toFixed(0);
+    document.getElementById('lcos-om-year').textContent = omAnnual.toFixed(1);
+    document.getElementById('lcos-eout').textContent = eOutAnnualMWh.toFixed(0);
+
+    renderLCOSCharts(investMW/10000, investMWh/10000, omAnnual, T, R);
+}
+
+function resetLCOS() {
+    document.querySelector('#lcos-presets [data-preset="custom"]').classList.add('active');
+    document.querySelectorAll('#lcos-presets .es-preset-btn').forEach(b => {
+        if (b.dataset.preset !== 'custom') b.classList.remove('active');
+    });
+}
+
+function renderLCOSCharts(investMW, investMWh, omAnnual, T, R) {
+    destroyChart('lcos-cost');
+    destroyChart('lcos-yearly');
+
+    // Cost composition pie
+    const totalOM = omAnnual * T;
+    const ctx1 = document.getElementById('lcos-cost-chart').getContext('2d');
+    chartInstances['lcos-cost'] = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['功率成本','容量成本','运维费用(折现)'],
+            datasets: [{ data: [investMW, investMWh, omAnnual],
+                backgroundColor: ['#FF9800','#FF5722','#FFCC80'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.label+': '+ctx.parsed.toFixed(0)+' 万元' } } } }
+    });
+
+    // Yearly cashflow
+    const ctx2 = document.getElementById('lcos-yearly-chart').getContext('2d');
+    const years = Array.from({length:T},(_,i)=>'第'+(i+1)+'年');
+    const omData = years.map((_,i)=>omAnnual);
+    chartInstances['lcos-yearly'] = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [{ label: '年运维费用(万元)', data: omData, backgroundColor: '#FF9800' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: '万元' } } } }
+    });
+}
+
+// --- ROI 预设值 ---
+const roiPresets = {
+    zj: { power:1, capacity:2, eta:88, cycles:330, life:10, unitcost:1500, omrate:1.5, loan:4.5, pbuy:0.35, psell:0.95, dod:90 },
+    gd: { power:2, capacity:4, eta:85, cycles:330, life:10, unitcost:1400, omrate:1.5, loan:4.0, pbuy:0.30, psell:1.05, dod:90 }
+};
+const roiFields = ['power','capacity','eta','cycles','life','unitcost','omrate','loan','pbuy','psell','dod'];
+
+function setROIPreset(key) {
+    document.querySelectorAll('#roi-presets .es-preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#roi-presets [data-preset="'+key+'"]').classList.add('active');
+    if (key === 'custom') { calcROI(); return; }
+    const p = roiPresets[key];
+    if (!p) return;
+    roiFields.forEach(f => { document.getElementById('roi-'+f).value = p[f]; });
+    calcROI();
+}
+
+// --- ROI 计算 ---
+function calcROI() {
+    const power = parseFloat(document.getElementById('roi-power').value) || 1;
+    const capacity = parseFloat(document.getElementById('roi-capacity').value) || 2;
+    const eta = parseFloat(document.getElementById('roi-eta').value) / 100 || 0.88;
+    const cycles = parseFloat(document.getElementById('roi-cycles').value) || 330;
+    const life = parseFloat(document.getElementById('roi-life').value) || 10;
+    const unitcost = parseFloat(document.getElementById('roi-unitcost').value) || 1500;
+    const omrate = parseFloat(document.getElementById('roi-omrate').value) / 100 || 0.015;
+    const loan = parseFloat(document.getElementById('roi-loan').value) / 100 || 0.045;
+    const pbuy = parseFloat(document.getElementById('roi-pbuy').value) || 0.35;
+    const psell = parseFloat(document.getElementById('roi-psell').value) || 0.95;
+    const dod = parseFloat(document.getElementById('roi-dod').value) / 100 || 0.9;
+
+    const invest = capacity * 1000 * unitcost / 10000; // 万元
+    const annualRevenue = cycles * capacity * eta * dod * (psell - pbuy); // 万元
+    const annualOM = invest * omrate; // 万元
+    const annualInterest = invest * loan; // 万元
+    const annualNet = annualRevenue - annualOM - annualInterest;
+    const roi = invest > 0 ? (annualNet / invest) * 100 : 0;
+
+    document.getElementById('roi-invest').textContent = invest.toFixed(0);
+    document.getElementById('roi-revenue').textContent = annualRevenue.toFixed(2);
+    document.getElementById('roi-om').textContent = annualOM.toFixed(2);
+    document.getElementById('roi-interest').textContent = annualInterest.toFixed(2);
+    document.getElementById('roi-net').textContent = annualNet.toFixed(2);
+    document.getElementById('roi-result').textContent = roi.toFixed(2);
+
+    renderROICharts(invest, annualRevenue, annualOM, annualInterest, annualNet, life);
+}
+
+function resetROI() {
+    document.querySelector('#roi-presets [data-preset="custom"]').classList.add('active');
+    document.querySelectorAll('#roi-presets .es-preset-btn').forEach(b => {
+        if (b.dataset.preset !== 'custom') b.classList.remove('active');
+    });
+}
+
+function renderROICharts(invest, rev, om, interest, net, life) {
+    destroyChart('roi-cashflow');
+    destroyChart('roi-pie');
+
+    // Cashflow chart
+    const ctx1 = document.getElementById('roi-cashflow-chart').getContext('2d');
+    const years = Array.from({length:life},(_,i)=>'第'+(i+1)+'年');
+    const yearlyNet = years.map(() => net);
+    const cumNet = yearlyNet.reduce((acc, v, i) => { acc.push((acc[i-1]||0)+v); return acc; }, []);
+    chartInstances['roi-cashflow'] = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [
+                { label: '年净收益(万元)', data: yearlyNet, backgroundColor: '#4CAF50', order: 2 },
+                { label: '累计净收益(万元)', data: cumNet, type: 'line', borderColor: '#E65100', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, order: 1 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { title: { display: true, text: '万元' } } } }
+    });
+
+    // Pie chart
+    const ctx2 = document.getElementById('roi-pie-chart').getContext('2d');
+    chartInstances['roi-pie'] = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['峰谷套利收入','运维成本','贷款利息','净收益'],
+            datasets: [{ data: [rev, om, interest, net], backgroundColor: ['#FF9800','#78909C','#F44336','#4CAF50'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.label+': '+ctx.parsed.toFixed(2)+' 万元' } } } }
+    });
+}
+
+// --- SaaS 模拟器 ---
+let saasData = { gen: new Array(24).fill(0), load: new Array(24).fill(0) };
+
+function autoFillTimeline() {
+    // Typical PV + industrial load curves
+    const gen = [0,0,0,0,0,0.1,0.3,0.6,1.0,1.5,2.0,2.5,2.8,2.5,2.0,1.5,1.0,0.5,0.1,0,0,0,0,0];
+    const load = [0.3,0.2,0.2,0.2,0.3,0.5,0.8,1.2,1.8,2.0,2.0,1.8,1.5,1.5,1.8,2.0,2.0,1.5,1.0,0.8,0.6,0.5,0.4,0.3];
+    saasData.gen = [...gen];
+    saasData.load = [...load];
+    renderSaaSTable();
+    runSaaS();
+}
+
+function renderSaaSTable() {
+    const tbody = document.getElementById('saas-table-body');
+    const power = parseFloat(document.getElementById('saas-power').value) || 2;
+    const cap = parseFloat(document.getElementById('saas-cap').value) || 8;
+    const dur = parseFloat(document.getElementById('saas-dur').value) || 4;
+    const eta = parseFloat(document.getElementById('saas-eta').value) / 100 || 0.9;
+    const etaRt = Math.sqrt(eta);
+
+    let batterySOC = cap * 0.3;
+    const minSOC = cap * 0.1;
+    const maxSOC = cap * 0.9;
+    let totalCharge = 0, totalDischarge = 0, totalCurtail = 0, totalGridBuy = 0;
+    const rows = [];
+
+    for (let h = 0; h < 24; h++) {
+        const net = saasData.gen[h] - saasData.load[h];
+        let action = '—', actionColor = '#888';
+        const chargeLimit = (maxSOC - batterySOC) * etaRt;
+        const dischargeLimit = (batterySOC - minSOC) / etaRt;
+
+        if (net > 0.01) {
+            const toCharge = Math.min(net, chargeLimit, power);
+            batterySOC += toCharge * etaRt;
+            totalCharge += toCharge;
+            const curtailed = net - toCharge;
+            totalCurtail += curtailed;
+            action = '充电 +'+toCharge.toFixed(1)+'MW';
+            actionColor = '#4CAF50';
+        } else if (net < -0.01) {
+            const deficit = -net;
+            const fromBatt = Math.min(deficit, dischargeLimit, power);
+            batterySOC -= fromBatt / etaRt;
+            totalDischarge += fromBatt;
+            const fromGrid = deficit - fromBatt;
+            totalGridBuy += fromGrid;
+            action = '放电 -'+fromBatt.toFixed(1)+'MW';
+            actionColor = '#E65100';
+        }
+
+        rows.push({h, gen:saasData.gen[h], load:saasData.load[h], net, action, actionColor, soc: batterySOC });
+    }
+
+    tbody.innerHTML = rows.map(r => {
+        const socPercent = (r.soc / cap * 100).toFixed(0);
+        return `<tr>
+            <td>${r.h}:00-${r.h+1}:00</td>
+            <td>${r.gen.toFixed(1)}</td>
+            <td>${r.load.toFixed(1)}</td>
+            <td style="color:${r.net>=0?'#4CAF50':'#E65100'};font-weight:600">${r.net>=0?'+':''}${r.net.toFixed(1)}</td>
+            <td style="color:${r.actionColor};font-weight:600">${r.action}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('saas-charge').textContent = totalCharge.toFixed(1);
+    document.getElementById('saas-discharge').textContent = totalDischarge.toFixed(1);
+    document.getElementById('saas-curtail').textContent = totalCurtail.toFixed(1);
+    document.getElementById('saas-gridbuy').textContent = totalGridBuy.toFixed(1);
+    const totalLoad = saasData.load.reduce((a,b)=>a+b,0);
+    const totalGen = saasData.gen.reduce((a,b)=>a+b,0);
+    document.getElementById('saas-selfrate').textContent = totalLoad > 0 ? ((1 - totalGridBuy/totalLoad)*100).toFixed(1) : '--';
+    document.getElementById('saas-util').textContent = cap > 0 ? ((totalDischarge/(cap*(24/dur)))*100).toFixed(1) : '--';
+
+    // Render bars
+    const barsDiv = document.getElementById('saas-bars');
+    const maxVal = Math.max(...saasData.gen, ...saasData.load, 1);
+    barsDiv.innerHTML = rows.map((r,i) => {
+        const genH = (r.gen/maxVal*100).toFixed(0);
+        const loadH = (r.load/maxVal*100).toFixed(0);
+        const netH = Math.abs(r.net)/maxVal*100;
+        const netColor = r.net >= 0 ? '#4CAF50' : '#E65100';
+        return `<div style="flex:1;display:flex;flex-direction:column;gap:1px;position:relative">
+            <div style="height:${genH}%;background:linear-gradient(to top,#FF9800,#FFCC80);border-radius:2px 2px 0 0;position:relative" title="发电 ${r.gen.toFixed(1)}MW">
+                <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:7px;color:#555;font-weight:600">${r.gen.toFixed(1)}</span>
+            </div>
+            <div style="height:2px;background:${netColor};opacity:0.5" title="净功率 ${r.net.toFixed(1)}MW"></div>
+            <div style="height:${loadH}%;background:linear-gradient(to top,#1565C0,#90CAF9);border-radius:0 0 2px 2px;position:relative" title="用电 ${r.load.toFixed(1)}MW">
+                <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:7px;color:#fff;font-weight:600">${r.load.toFixed(1)}</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Hour labels
+    document.getElementById('saas-hour-labels').innerHTML = Array.from({length:24},(_,i)=>`<span style="width:calc(100%/24);text-align:center">${i}h</span>`).join('');
+}
+
+function runSaaS() {
+    renderSaaSTable();
+}
+
+function resetSaaS() {
+    saasData.gen = new Array(24).fill(0);
+    saasData.load = new Array(24).fill(0);
+    document.getElementById('saas-name').value = '锂电池储能';
+    document.getElementById('saas-dur').value = 4;
+    document.getElementById('saas-power').value = 2;
+    document.getElementById('saas-lcos').value = 0.45;
+    document.getElementById('saas-step').value = 0.1;
+    document.getElementById('saas-gen-total').value = 120;
+    document.getElementById('saas-load-total').value = 100;
+    document.getElementById('saas-cap').value = 8;
+    document.getElementById('saas-eta').value = 90;
+    renderSaaSTable();
+}
+
+// ============ 初始化 ============
+document.addEventListener('DOMContentLoaded', function() {
+    switchTool('breaker');
+    addExampleData();
+    onRoofTypeChange();
+});
+</script>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+</body>
+</html>
